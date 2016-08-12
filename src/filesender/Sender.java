@@ -16,6 +16,8 @@ public class Sender extends JFrame implements ActionListener {
 
 	private static final long serialVersionUID = 1L;
 	/* For giving instructions on what to enter in the txt field below */
+
+	private final String giveLoc = "Please give file location";
 	private JLabel label = null;
 	/* text field for entering file location */
 	private JTextField tfLocation = null;
@@ -25,7 +27,7 @@ public class Sender extends JFrame implements ActionListener {
 	/* For entering the ip and port number */
 	private JTextField tfServerIP = null, tfPortNo = null;
 	/* Buttons for actions to be performed */
-	private JButton btnConnect = null, logout = null; 
+	private JButton btnConnect = null, btnSend = null; 
 	private JButton btnBrowse = null; 
 	/* For displaying messages */
 	private JTextArea taMessages = null, taUsers = null;
@@ -74,21 +76,22 @@ public class Sender extends JFrame implements ActionListener {
 
 		JPanel textFieldButtonPanel = new JPanel(new RelativeLayout(RelativeLayout.X_AXIS, 3));
 
-		tfLocation = new JTextField("Please give the location");
+		tfLocation = new JTextField(giveLoc);
 		flnLogin = new FocusListener() {
 			public void focusGained(FocusEvent e) {
-				if (tfLocation.getText().equals("Please give the location")) {
+				if (tfLocation.getText().equals(giveLoc)) {
 					tfLocation.setText("");
 				}
 			}
 			public void focusLost(FocusEvent e) {
 				if (tfLocation.getText().equals("")) {
-					tfLocation.setText("Please give the location");
+					tfLocation.setText(giveLoc);
 				}
 			}
 		};
 		tfLocation.addFocusListener(flnLogin);
 		tfLocation.setBackground(Color.WHITE);
+		tfLocation.setEditable(false);
 
 		btnBrowse = new JButton("Browse");
 		btnBrowse.addActionListener(this);
@@ -97,9 +100,6 @@ public class Sender extends JFrame implements ActionListener {
 		textFieldButtonPanel.add(tfLocation, new Float(5));
 		textFieldButtonPanel.add(btnBrowse, new Float(1));
 
-		/*
-		textFieldButtonPanel.add(new JLabel(""), new Float(1));
-		*/
 		/* put all of this in the north pannel */
 		northPanel.add(textFieldButtonPanel);
 		this.add(northPanel, BorderLayout.NORTH);
@@ -122,12 +122,12 @@ public class Sender extends JFrame implements ActionListener {
 		/* the 3 buttons */
 		btnConnect = new JButton("Connect");
 		btnConnect.addActionListener(this);
-		logout = new JButton("Logout");
-		logout.addActionListener(this);
-		logout.setEnabled(false);
+		btnSend = new JButton("Send");
+		btnSend.addActionListener(this);
+		btnSend.setEnabled(false);
 
 		southPanel.add(btnConnect);
-		southPanel.add(logout);
+		southPanel.add(btnSend);
 
 		this.add(southPanel, BorderLayout.SOUTH);
 
@@ -138,7 +138,7 @@ public class Sender extends JFrame implements ActionListener {
 
 		tfLocation.addActionListener(this);
 
-		tfLocation.requestFocus();
+		btnConnect.requestFocus();
 	}
 
 	public void append(String s) 
@@ -168,9 +168,11 @@ public class Sender extends JFrame implements ActionListener {
 
 	public void brokenConnection() {
 		btnConnect.setEnabled(true);
-		logout.setEnabled(false);
+		btnSend.setEnabled(false);
+
+		tfLocation.setEditable(false);
+		btnBrowse.setEnabled(false);
 		label.setText("Enter your Username and password below");
-		tfLocation.setText("Name");
 		tfPortNo.setText("" + this.portNo);
 		tfServerIP.setText(this.hostAddress);
 		tfServerIP.setEditable(true);
@@ -186,8 +188,8 @@ public class Sender extends JFrame implements ActionListener {
 	public void actionPerformed(ActionEvent e) {
 		Object o = e.getSource();
 
-		/* logout being the button */
-		if (o == logout) {
+		/* btnSend being the button */
+		if (o == btnSend) {
 			/*
 			speaker.logoff();
 			*/
@@ -197,9 +199,9 @@ public class Sender extends JFrame implements ActionListener {
 			/* some other buttons might be added here? */
 		}
 
-		if (o == logout) {
+		if (o == btnSend) {
 			if (connected) {
-				/* sending message */
+				/* btnSending message */
 				String rname = tfLocation.getText();
 				/*
 				if (speaker.sendString(mtext, rname)) {
@@ -209,7 +211,7 @@ public class Sender extends JFrame implements ActionListener {
 				}
 				*/
 					
-				tfLocation.setText("Name");
+				tfLocation.setText(giveLoc);
 				return;
 			} else {
 				/* broken connection, attempt to reconnect */
@@ -257,12 +259,12 @@ public class Sender extends JFrame implements ActionListener {
 			thread.start();
 			*/
 
-			tfLocation.setText("file");
-			label.setText("Enter recipient and message, followed by <enter>, or choose an alternative action from the buttons below.");
 			connected = true;
 
 			btnConnect.setEnabled(false);
-			logout.setEnabled(true);
+			btnSend.setEnabled(true);
+			tfLocation.setEditable(true);
+			btnBrowse.setEnabled(true);
 
 			tfServerIP.setEditable(false);
 			tfPortNo.setEditable(false);
