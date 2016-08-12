@@ -1,4 +1,4 @@
-package filesender;
+package filereceiver;
 
 import java.util.Scanner;
 import java.util.Set;
@@ -13,7 +13,7 @@ import java.awt.event.*;
 import layouts.RelativeLayout;
 
 
-public class Sender extends JFrame implements ActionListener {
+public class Receiver extends JFrame implements ActionListener {
 
 	private static final long serialVersionUID = 1L;
 	/* For giving instructions on what to enter in the txt field below */
@@ -28,19 +28,19 @@ public class Sender extends JFrame implements ActionListener {
 	/* For entering the ip and port number */
 	private JTextField tfServerIP = null, tfPortNo = null;
 	/* Buttons for actions to be performed */
-	private JButton btnConnectSend = null, btnDisconnect = null; 
+	private JButton btnDisconnect = null; 
 	private JButton btnBrowse = null; 
 	/* For displaying messages */
 	private JTextArea taTCP = null, taUDP = null;
 	/* current connection status */
 	private boolean connected = false;
-	/* The Sender Listener */
+	/* The Receiver Listener */
 	/*
-	private SenderListener listener = null;
+	private ReceiverListener listener = null;
 	*/
-	/* The Sender Speaker for sending messages to the server */
+	/* The Receiver Speaker for sending messages to the server */
 	/*
-	private SenderSpeaker speaker = null;
+	private ReceiverSpeaker speaker = null;
 	*/
 	private String myName = null;
 
@@ -52,9 +52,10 @@ public class Sender extends JFrame implements ActionListener {
 	/* Create a file chooser */
 	private JFileChooser fc = null;
 	
-	public Sender(String host, int port) {
-		super("Send File");
+	public Receiver(String host, int port) {
+		super("Receive File");
 		this.portNo = port;
+		/* TODO:figure out here how to get my IP */
 		this.hostAddress = host;
 		this.fc = new JFileChooser();
 
@@ -72,6 +73,8 @@ public class Sender extends JFrame implements ActionListener {
 		serverPortPanel.add(new JLabel("Port Number:  "));
 		serverPortPanel.add(tfPortNo);
 		serverPortPanel.add(new JLabel(""));
+		tfServerIP.setEditable(false);
+		tfPortNo.setEditable(false);
 		/* put all of this in the north pannel */
 		northPanel.add(serverPortPanel);
 
@@ -124,15 +127,10 @@ public class Sender extends JFrame implements ActionListener {
 
 		JPanel southPanel = new JPanel();
 
-		/* the 3 buttons */
-		btnConnectSend = new JButton("Connect and Send");
-		btnConnectSend.addActionListener(this);
-
+		/* the button */
 		btnDisconnect = new JButton("Disconnect");
 		btnDisconnect.addActionListener(this);
-		btnDisconnect.setEnabled(false);
 
-		southPanel.add(btnConnectSend);
 		southPanel.add(btnDisconnect);
 
 		this.add(southPanel, BorderLayout.SOUTH);
@@ -143,8 +141,6 @@ public class Sender extends JFrame implements ActionListener {
 
 
 		tfLocation.addActionListener(this);
-
-		btnConnectSend.requestFocus();
 	}
 
 	public void appendTCP(String s) 
@@ -181,16 +177,11 @@ public class Sender extends JFrame implements ActionListener {
 
 	*/
 	public void breakConnection() {
-		btnConnectSend.setEnabled(true);
-		btnDisconnect.setEnabled(false);
-
 		tfLocation.setEditable(true);
 		btnBrowse.setEnabled(true);
 		label.setText("Enter your Username and password below");
 		tfPortNo.setText("" + this.portNo);
 		tfServerIP.setText(this.hostAddress);
-		tfServerIP.setEditable(true);
-		tfPortNo.setEditable(true);
 		/*
 		tfLocation.removeActionListener(this);
 		*/
@@ -215,74 +206,7 @@ public class Sender extends JFrame implements ActionListener {
 			returnval = fc.showOpenDialog(this);
 			file = fc.getSelectedFile();
 			tfLocation.setText(file.getName());
-
-		} else if (o == btnConnectSend) {
-			String fileLocation = tfLocation.getText().trim();
-			if (fileLocation.length() == 0) {
-				return;
-			}
 			
-			String server = tfServerIP.getText().trim();
-			if (server.length() == 0) {
-				return;
-			}
-
-			String portNumber = tfPortNo.getText().trim();
-			if (portNumber.length() == 0) {
-				return;
-			}
-			int port = -1;
-			try {
-				port = Integer.parseInt(portNumber);
-			} catch (Exception except) {
-				System.err.printf("Please provide a valid port number\n");
-				return;
-			}
-			this.myName = fileLocation;
-			
-			/*
-			this.speaker = new SenderSpeaker(fileLocation, server, port, true);
-			*/
-			/* open connection if possible */
-			/*
-			if (!this.speaker.tcpConnect(password)) {
-				return;
-			}
-			*/
-
-			/*
-			this.listener = new SenderListener(this.speaker.getSocketChannel(), this, fileLocation);
-			Thread thread = new Thread(listener);
-			thread.start();
-			*/
-			connected = true;
-
-
-			btnConnectSend.setEnabled(false);
-			btnDisconnect.setEnabled(true);
-			tfLocation.setEditable(false);
-			btnBrowse.setEnabled(false);
-
-			tfServerIP.setEditable(false);
-			tfPortNo.setEditable(false);
-
-			if (connected) {
-				/* Sending message */
-				String rname = tfLocation.getText();
-				this.appendTCP(rname);
-				/*
-				if (speaker.sendString(mtext, rname)) {
-					this.append(this.myName + " to " + rname + ": " + mtext + "\n");
-				} else {
-					this.append("Some error sending message\n");
-				}
-					
-				tfLocation.setText(giveLoc);
-				*/
-				return;
-			} else {
-				/* broken connection, attempt to reconnect */
-			}
 		}
 	}
 
@@ -300,8 +224,8 @@ public class Sender extends JFrame implements ActionListener {
 	}
 
     public static void main(String[] args)  {
-		Sender sender = null;
-		sender = new Sender("localhost", 8002);
-		System.out.println("made a sender");
+		Receiver receiver = null;
+		receiver = new Receiver("localhost", 8002);
+		System.out.println("made a receiver");
 	}
 }

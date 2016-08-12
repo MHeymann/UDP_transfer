@@ -3,6 +3,7 @@ import java.util.Scanner;
 import java.util.Set;
 import java.util.Arrays;
 import filesender.*;
+import filereceiver.*;
 /*
 import client.*;
 import packet.*;
@@ -122,7 +123,19 @@ EXIT_ON_CLOSE
 			new Sender(server, port);
 
 		} else if (o == receivefile) {
-			return;
+			String portNumber = tfPortNo.getText().trim();
+			if (portNumber.length() == 0) {
+				return;
+			}
+			int port = -1;
+			try {
+				port = Integer.parseInt(portNumber);
+			} catch (Exception except) {
+				System.err.printf("Please provide a valid port number\n");
+				return;
+			}
+			
+			new Receiver("localhost", port);
 		} else {
 			System.err.printf("This is weird\n");
 		}
