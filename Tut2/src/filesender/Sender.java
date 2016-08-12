@@ -3,44 +3,32 @@ package filesender;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.Arrays;
-/*
-import client.*;
-import packet.*;
-*/
 import java.io.Console;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 
-/*
- * Author Murray Heymann
- *
- * This file is starts the client.  If it is started in gui mode, the swing
- * components are created and managed from here.  Threads for incoming and
- * outgoing data are created from here.  
- *
- * "LAFAYETTE!
- * I'm taking this horse
- * by the reins making
- * Redcoats redder with bloodstains"
- * Guns And Ships, Hamilton
- */
+import layouts.RelativeLayout;
+
+
 public class Sender extends JFrame implements ActionListener {
 
 	private static final long serialVersionUID = 1L;
 	/* For giving instructions on what to enter in the txt field below */
+
+	private final String giveLoc = "Please give file location";
 	private JLabel label = null;
-	/* text field for entering username and messages */
-	private JTextField tfName = null;
-	private JTextField tfData = null;
+	/* text field for entering file location */
+	private JTextField tfLocation = null;
 
 	private FocusListener flnLogin;
 	private FocusListener fldLogin, fldConnect;
 	/* For entering the ip and port number */
 	private JTextField tfServerIP = null, tfPortNo = null;
 	/* Buttons for actions to be performed */
-	private JButton login = null, logout = null; 
+	private JButton btnConnect = null, btnSend = null; 
+	private JButton btnBrowse = null; 
 	/* For displaying messages */
 	private JTextArea taMessages = null, taUsers = null;
 	/* current connection status */
@@ -66,7 +54,7 @@ public class Sender extends JFrame implements ActionListener {
 		this.hostAddress = host;
 
 		/* NorthPanel */
-		JPanel northPanel = new JPanel(new GridLayout(4,1));
+		JPanel northPanel = new JPanel(new GridLayout(3,1));
 		/* Spacte to enter the server's name and port number */
 		JPanel serverPortPanel = new JPanel(new GridLayout(1,5, 1,3));
 		/* start up the text fields for server name and port number */
@@ -83,55 +71,37 @@ public class Sender extends JFrame implements ActionListener {
 		northPanel.add(serverPortPanel);
 
 		/* The label and text field for communication */
-		label = new JLabel("Enter your Username:", SwingConstants.CENTER);
+		label = new JLabel("Enter the location of the file you want to send:", SwingConstants.CENTER);
 		northPanel.add(label);
-		tfName = new JTextField("Name");
-		tfData = new JTextField("Password");
 
+		JPanel textFieldButtonPanel = new JPanel(new RelativeLayout(RelativeLayout.X_AXIS, 3));
+
+		tfLocation = new JTextField(giveLoc);
 		flnLogin = new FocusListener() {
 			public void focusGained(FocusEvent e) {
-				if (tfName.getText().equals("Name")) {
-					tfName.setText("");
+				if (tfLocation.getText().equals(giveLoc)) {
+					tfLocation.setText("");
 				}
 			}
 			public void focusLost(FocusEvent e) {
-				if (tfName.getText().equals("")) {
-					tfName.setText("Name");
+				if (tfLocation.getText().equals("")) {
+					tfLocation.setText(giveLoc);
 				}
 			}
 		};
-		fldLogin = new FocusListener() {
-			public void focusGained(FocusEvent e) {
-				if (tfData.getText().equals("Password")) {
-					tfData.setText("");
-				}
-			}
-			public void focusLost(FocusEvent e) {
-				if (tfData.getText().equals("")) {
-					tfData.setText("Password");
-				}
-			}
-		};
+		tfLocation.addFocusListener(flnLogin);
+		tfLocation.setBackground(Color.WHITE);
+		tfLocation.setEditable(false);
 
-		fldConnect = new FocusListener() {
-			public void focusGained(FocusEvent e) {
-				if (tfData.getText().equals("Message")) {
-					tfData.setText("");
-				}
-			}
-			public void focusLost(FocusEvent e) {
-				if (tfData.getText().equals("")) {
-					tfData.setText("Message");
-				}
-			}
-		};
+		btnBrowse = new JButton("Browse");
+		btnBrowse.addActionListener(this);
+		btnBrowse.setEnabled(false);
 
-		tfName.addFocusListener(flnLogin);
-		tfData.addFocusListener(fldLogin);
-		tfName.setBackground(Color.WHITE);
-		tfData.setBackground(Color.WHITE);
-		northPanel.add(tfName);
-		northPanel.add(tfData);
+		textFieldButtonPanel.add(tfLocation, new Float(5));
+		textFieldButtonPanel.add(btnBrowse, new Float(1));
+
+		/* put all of this in the north pannel */
+		northPanel.add(textFieldButtonPanel);
 		this.add(northPanel, BorderLayout.NORTH);
 
 		/* 
@@ -150,14 +120,14 @@ public class Sender extends JFrame implements ActionListener {
 		JPanel southPanel = new JPanel();
 
 		/* the 3 buttons */
-		login = new JButton("Login");
-		login.addActionListener(this);
-		logout = new JButton("Logout");
-		logout.addActionListener(this);
-		logout.setEnabled(false);
+		btnConnect = new JButton("Connect");
+		btnConnect.addActionListener(this);
+		btnSend = new JButton("Send");
+		btnSend.addActionListener(this);
+		btnSend.setEnabled(false);
 
-		southPanel.add(login);
-		southPanel.add(logout);
+		southPanel.add(btnConnect);
+		southPanel.add(btnSend);
 
 		this.add(southPanel, BorderLayout.SOUTH);
 
@@ -166,10 +136,9 @@ public class Sender extends JFrame implements ActionListener {
 		this.setVisible(true);
 
 
-		tfName.addActionListener(this);
-		tfData.addActionListener(this);
+		tfLocation.addActionListener(this);
 
-		tfName.requestFocus();
+		btnConnect.requestFocus();
 	}
 
 	public void append(String s) 
@@ -198,20 +167,18 @@ public class Sender extends JFrame implements ActionListener {
 	}
 
 	public void brokenConnection() {
-		login.setEnabled(true);
-		logout.setEnabled(false);
+		btnConnect.setEnabled(true);
+		btnSend.setEnabled(false);
+
+		tfLocation.setEditable(false);
+		btnBrowse.setEnabled(false);
 		label.setText("Enter your Username and password below");
-		tfName.setText("Name");
-		tfData.setText("Password");
-		tfData.removeFocusListener(fldConnect);
-		tfData.addFocusListener(fldLogin);
 		tfPortNo.setText("" + this.portNo);
 		tfServerIP.setText(this.hostAddress);
 		tfServerIP.setEditable(true);
 		tfPortNo.setEditable(true);
 		/*
-		tfName.removeActionListener(this);
-		tfData.removeActionListener(this);
+		tfLocation.removeActionListener(this);
 		*/
 		connected = false;
 		taMessages.setText("");
@@ -221,8 +188,8 @@ public class Sender extends JFrame implements ActionListener {
 	public void actionPerformed(ActionEvent e) {
 		Object o = e.getSource();
 
-		/* logout being the button */
-		if (o == logout) {
+		/* btnSend being the button */
+		if (o == btnSend) {
 			/*
 			speaker.logoff();
 			*/
@@ -232,38 +199,31 @@ public class Sender extends JFrame implements ActionListener {
 			/* some other buttons might be added here? */
 		}
 
-		if (o == tfName) {
-			tfData.requestFocus();
-			return;
-		}
-		if (connected) {
-			/* sending message */
-			String mtext = tfData.getText();
-			String rname = tfName.getText();
-			/*
-			if (speaker.sendString(mtext, rname)) {
-				this.append(this.myName + " to " + rname + ": " + mtext + "\n");
+		if (o == btnSend) {
+			if (connected) {
+				/* btnSending message */
+				String rname = tfLocation.getText();
+				/*
+				if (speaker.sendString(mtext, rname)) {
+					this.append(this.myName + " to " + rname + ": " + mtext + "\n");
+				} else {
+					this.append("Some error sending message\n");
+				}
+				*/
+					
+				tfLocation.setText(giveLoc);
+				return;
 			} else {
-				this.append("Some error sending message\n");
+				/* broken connection, attempt to reconnect */
 			}
-			*/
-				
-			tfName.setText("Name");
-			tfData.setText("Message");
-			return;
 		}
 
-		if ((o == login) || (o == tfData)) {
-			String username = tfName.getText().trim();
-			if (username.length() == 0) {
+		if (o == btnConnect) {
+			String fileLocation = tfLocation.getText().trim();
+			if (fileLocation.length() == 0) {
 				return;
 			}
 			
-			String password = tfData.getText().trim();
-			if (password.length() == 0) {
-				return;
-			}
-
 			String server = tfServerIP.getText().trim();
 			if (server.length() == 0) {
 				return;
@@ -282,38 +242,34 @@ public class Sender extends JFrame implements ActionListener {
 			}
 			
 			/*
-			this.speaker = new ClientSpeaker(username, server, port, true);
+			this.speaker = new ClientSpeaker(fileLocation, server, port, true);
 			*/
-			this.myName = username;
+			this.myName = fileLocation;
 			/* open connection if possible */
 
 			/*
-			if (!this.speaker.login(password)) {
+			if (!this.speaker.btnConnect(password)) {
 				return;
 			}
 			*/
 
 			/*
-			this.listener = new ClientListener(this.speaker.getSocketChannel(), this, username);
+			this.listener = new ClientListener(this.speaker.getSocketChannel(), this, fileLocation);
 			Thread thread = new Thread(listener);
 			thread.start();
 			*/
 
-			tfData.setText("Message");
-			tfData.removeFocusListener(fldLogin);
-			tfData.addFocusListener(fldConnect);
-			tfName.setText("Name");
-			label.setText("Enter recipient and message, followed by <enter>, or choose an alternative action from the buttons below.");
 			connected = true;
 
-			login.setEnabled(false);
-			logout.setEnabled(true);
+			btnConnect.setEnabled(false);
+			btnSend.setEnabled(true);
+			tfLocation.setEditable(true);
+			btnBrowse.setEnabled(true);
 
 			tfServerIP.setEditable(false);
 			tfPortNo.setEditable(false);
 			/*
-			tfName.addActionListener(this);
-			tfData.addActionListener(this);
+			tfLocation.addActionListener(this);
 			*/
 
 			this.setTitle(this.getTitle() + " - " + this.myName);
@@ -336,46 +292,7 @@ public class Sender extends JFrame implements ActionListener {
 
     public static void main(String[] args)  {
 		Sender sender = null;
-		String line = null;
-		String name = null;
-		/*
-		Thread threadSpeaker = null;
-		Thread threadListen = null;
-		ClientSpeaker speaker = null;
-		ClientListener listener = null;
-		*/
-		Scanner scanner = new Scanner(System.in);
-		
-		if ((args.length >= 1) && args[0].equals("terminal")) {
-
-			System.out.printf("Please enter your username: ");
-			name = scanner.nextLine();
-			/*
-			speaker = new ClientSpeaker(name, "127.0.0.1", 8002, false);
-			*/
-	
-			System.out.printf("Please provide the password for %s: ", name);
-			line = getPassword();
-
-			System.out.printf("%s with password %s \n", name, line);
-			/*
-			if (!speaker.login(line)) {
-				return;
-			}
-			*/
-			/*
-			listener = new ClientListener(speaker.getSocketChannel());
-			*/
-	
-			/*
-			threadSpeaker = new Thread(speaker);
-			threadListen = new Thread(listener);
-			threadSpeaker.start();
-			threadListen.start();
-			*/
-		} else {
-			sender = new Sender("localhost", 8002);
-			System.out.println("made a sender");
-		}
+		sender = new Sender("localhost", 8002);
+		System.out.println("made a sender");
 	}
 }
