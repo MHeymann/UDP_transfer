@@ -18,26 +18,21 @@ public class Receiver extends JFrame implements ActionListener {
 	private static final long serialVersionUID = 1L;
 	/* For giving instructions on what to enter in the txt field below */
 
-	private final String giveLoc = "Please give file location";
-	private JLabel label = null;
-	/* text field for entering file location */
-	private JTextField tfLocation = null;
+	private final String giveLoc = "<File Location>";
 
-	private FocusListener flnLogin;
-	private FocusListener fldLogin, fldConnect;
-	/* For entering the ip and port number */
+	private JLabel label = null;
+	private JLabel lblLocation = null;
+
+	/* For displaying the ip and port number */
 	private JTextField tfServerIP = null, tfPortNo = null;
 	/* Buttons for actions to be performed */
 	private JButton btnDisconnect = null; 
-	private JButton btnBrowse = null; 
 	/* For displaying messages */
 	private JTextArea taTCP = null, taUDP = null;
 	/* current connection status */
 	private boolean connected = false;
 	/* The Receiver Listener */
-	/*
 	private ReceiverListener listener = null;
-	*/
 	/* The Receiver Speaker for sending messages to the server */
 	/*
 	private ReceiverSpeaker speaker = null;
@@ -58,6 +53,7 @@ public class Receiver extends JFrame implements ActionListener {
 		/* TODO:figure out here how to get my IP */
 		this.hostAddress = host;
 		this.fc = new JFileChooser();
+		this.listener = new ReceiverListener(this, port);
 
 		/* NorthPanel */
 		JPanel northPanel = new JPanel(new GridLayout(3,1));
@@ -79,37 +75,12 @@ public class Receiver extends JFrame implements ActionListener {
 		northPanel.add(serverPortPanel);
 
 		/* The label and text field for communication */
-		label = new JLabel("Enter the location of the file you want to send:", SwingConstants.CENTER);
+		label = new JLabel("File Location:", SwingConstants.CENTER);
 		northPanel.add(label);
 
-		JPanel textFieldButtonPanel = new JPanel(new RelativeLayout(RelativeLayout.X_AXIS, 3));
+		lblLocation = new JLabel(giveLoc, SwingConstants.CENTER);
 
-		tfLocation = new JTextField(giveLoc);
-		flnLogin = new FocusListener() {
-			public void focusGained(FocusEvent e) {
-				if (tfLocation.getText().equals(giveLoc)) {
-					tfLocation.setText("");
-				}
-			}
-			public void focusLost(FocusEvent e) {
-				if (tfLocation.getText().equals("")) {
-					tfLocation.setText(giveLoc);
-				}
-			}
-		};
-		tfLocation.addFocusListener(flnLogin);
-		tfLocation.setBackground(Color.WHITE);
-		tfLocation.setEditable(true);
-
-		btnBrowse = new JButton("Browse");
-		btnBrowse.addActionListener(this);
-		btnBrowse.setEnabled(true);
-
-		textFieldButtonPanel.add(tfLocation, new Float(5));
-		textFieldButtonPanel.add(btnBrowse, new Float(1));
-
-		/* put all of this in the north pannel */
-		northPanel.add(textFieldButtonPanel);
+		northPanel.add(lblLocation);
 		this.add(northPanel, BorderLayout.NORTH);
 
 		/* 
@@ -139,8 +110,7 @@ public class Receiver extends JFrame implements ActionListener {
 		this.setSize(800, 600);
 		this.setVisible(true);
 
-
-		tfLocation.addActionListener(this);
+		(new Thread(listener)).start();
 	}
 
 	public void appendTCP(String s) 
@@ -155,37 +125,10 @@ public class Receiver extends JFrame implements ActionListener {
 		taUDP.setCaretPosition(taTCP.getText().length() - 1);
 	}
 
-	/*
-	public void showOnlineUsers(Set<String> users) {
-		int i;
-		String[] userArray = new String[users.size()];
-
-		i = 0;
-		for (String s: users){
-			userArray[i] = s;
-			i++;
-		}
-
-		Arrays.sort(userArray);
-
-		taUDP.setText("");
-		taUDP.append("Online Users:\n");
-		for (String s: userArray) {
-			taUDP.append(s + "\n");
-		}
-	}
-
-	*/
 	public void breakConnection() {
-		tfLocation.setEditable(true);
-		btnBrowse.setEnabled(true);
 		label.setText("Enter your Username and password below");
 		tfPortNo.setText("" + this.portNo);
 		tfServerIP.setText(this.hostAddress);
-		/*
-		tfLocation.removeActionListener(this);
-		*/
-		connected = false;
 		taTCP.setText("TCP message area:\n");
 		taUDP.setText("UDP message area:\n");
 	}
@@ -202,11 +145,6 @@ public class Receiver extends JFrame implements ActionListener {
 			*/
 			this.breakConnection();
 			return;
-		} else if (o == btnBrowse) {
-			returnval = fc.showOpenDialog(this);
-			file = fc.getSelectedFile();
-			tfLocation.setText(file.getName());
-			
 		}
 	}
 

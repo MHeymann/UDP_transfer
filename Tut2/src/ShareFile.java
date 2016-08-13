@@ -89,7 +89,7 @@ public class ShareFile extends JFrame implements ActionListener {
 
 		this.add(southPanel, BorderLayout.SOUTH);
 
-		this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+		this.setDefaultCloseOperation(EXIT_ON_CLOSE);
 		/*
 EXIT_ON_CLOSE
 		*/

@@ -19,3 +19,6 @@ tale.txt
 *.java~
 
 *.swp
+
+.metadata
+
