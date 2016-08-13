@@ -7,12 +7,12 @@ import java.nio.channels.*;
 import java.util.*;
 
 public class ReceiverListener implements Runnable {
-	private int port = -1;
 	private Receiver receiver = null;
+	private int port = -1;
 
 	public ReceiverListener(Receiver receiver, int port) {
-		this.port = port;
 		this.receiver = receiver;
+		this.port = port;
 	}
 
 	public void run() {
@@ -27,13 +27,13 @@ public class ReceiverListener implements Runnable {
 	{
 		int num;
 		ServerSocketChannel serverSocketChannel = null;
+		SocketChannel socketChannel = null;
 		Selector selector = null;
 		ServerSocket serverSocket = null;
 		InetSocketAddress address = null;
 		SelectionKey key = null;
 		Set<SelectionKey> selectedKeys = null;
 		Iterator<SelectionKey> it = null;
-		SocketChannel socketChannel = null;
 		SelectionKey newKey = null;
 		
 
@@ -70,19 +70,12 @@ public class ReceiverListener implements Runnable {
 					socketChannel = serverSocketChannel.accept();
 					socketChannel.configureBlocking(false);
 					
-					/* register on selector */
-					newKey = null;
-					newKey = socketChannel.register(selector, SelectionKey.OP_READ);
-					it.remove();
-
+					(new Thread(new ReceiverConstructor(socketChannel, this.receiver))).start();
 					this.receiver.appendTCP("New TCP connection from " + socketChannel.toString());
-				} else if ((key.readyOps() & SelectionKey.OP_ACCEPT)
+					it.remove();
+				} else if ((key.readyOps() & SelectionKey.OP_READ)
 						== SelectionKey.OP_READ) {
-					socketChannel = null;
-					socketChannel = (SocketChannel)key.channel();
-					/* 
-					 * Do things to let the whole process begin
-					 */
+					this.receiver.appendTCP("This is thoroughly weird");
 					it.remove();
 				}
 			}

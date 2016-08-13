@@ -34,9 +34,6 @@ public class Receiver extends JFrame implements ActionListener {
 	/* The Receiver Listener */
 	private ReceiverListener listener = null;
 	/* The Receiver Speaker for sending messages to the server */
-	/*
-	private ReceiverSpeaker speaker = null;
-	*/
 	private String myName = null;
 
 	/* The port to connect to */
@@ -83,10 +80,7 @@ public class Receiver extends JFrame implements ActionListener {
 		northPanel.add(lblLocation);
 		this.add(northPanel, BorderLayout.NORTH);
 
-		/* 
-		 * The CenterPanel where chat's are displayed and online users
-		 * shown
-		 */
+		/* The CenterPanel where info about datatransfer is displayed */
 		taTCP = new JTextArea("TCP message area:\n", 80, 80);
 		taUDP = new JTextArea("UDP message area:\n", 80, 80);
 		JPanel centerPanel = new JPanel(new GridLayout(1,1));
@@ -146,19 +140,6 @@ public class Receiver extends JFrame implements ActionListener {
 			this.breakConnection();
 			return;
 		}
-	}
-
-	public static String getPassword() {
-		String line = null;
-		Console cons = null;
-		char[] passwd = null;
-
-		if ((cons = System.console()) != null &&
-				(passwd = cons.readPassword()) != null) {
-			line = new String(passwd);
-			java.util.Arrays.fill(passwd, ' ');
-		}
-		return line;
 	}
 
     public static void main(String[] args)  {

@@ -95,6 +95,7 @@ public class QuoteServerThreadNIO extends Thread {
 			address = new InetSocketAddress(ports[i]);
 			dSocket.bind(address);
 
+			cation
 			key = dChannel.register(selector, SelectionKey.OP_READ);
 
 			System.out.printf("Going to listen on %d\n", ports[i]);
