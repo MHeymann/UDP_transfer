@@ -33,15 +33,9 @@ public class Sender extends JFrame implements ActionListener {
 	/* For displaying messages */
 	private JTextArea taTCP = null, taUDP = null;
 	/* current connection status */
-	private boolean connected = false;
-	/* The Sender Listener */
-	/*
-	private SenderListener listener = null;
-	*/
-	/* The Sender Speaker for sending messages to the server */
-	/*
-	private SenderSpeaker speaker = null;
-	*/
+
+	private SenderDeconstructor deconstructor = null;
+
 	private String myName = null;
 
 	/* The port to connect to */
@@ -105,7 +99,7 @@ public class Sender extends JFrame implements ActionListener {
 		textFieldButtonPanel.add(tfLocation, new Float(5));
 		textFieldButtonPanel.add(btnBrowse, new Float(1));
 
-		/* put all of this in the north pannel */
+		/* put all of this in the north panel */
 		northPanel.add(textFieldButtonPanel);
 		this.add(northPanel, BorderLayout.NORTH);
 
@@ -141,7 +135,6 @@ public class Sender extends JFrame implements ActionListener {
 		this.setSize(800, 600);
 		this.setVisible(true);
 
-
 		tfLocation.addActionListener(this);
 
 		btnConnectSend.requestFocus();
@@ -170,10 +163,7 @@ public class Sender extends JFrame implements ActionListener {
 		tfServerIP.setText(this.hostAddress);
 		tfServerIP.setEditable(true);
 		tfPortNo.setEditable(true);
-		/*
-		tfLocation.removeActionListener(this);
-		*/
-		connected = false;
+
 		taTCP.setText("TCP message area:\n");
 		taUDP.setText("UDP message area:\n");
 	}
@@ -185,24 +175,19 @@ public class Sender extends JFrame implements ActionListener {
 
 		/* Disconnect being the button */
 		if (o == btnDisconnect) {
-			/*
-			speaker.logoff();
-			*/
 			this.breakConnection();
-			return;
 		} else if (o == btnBrowse) {
 			returnval = fc.showOpenDialog(this);
 			file = fc.getSelectedFile();
 			tfLocation.setText(file.getName());
-
 		} else if (o == btnConnectSend) {
 			String fileLocation = tfLocation.getText().trim();
 			if (fileLocation.length() == 0) {
 				return;
 			}
 			
-			String server = tfServerIP.getText().trim();
-			if (server.length() == 0) {
+			String server_ip = tfServerIP.getText().trim();
+			if (server_ip.length() == 0) {
 				return;
 			}
 
@@ -219,24 +204,11 @@ public class Sender extends JFrame implements ActionListener {
 			}
 			this.myName = fileLocation;
 			
-			/////////////////////////////////////////////////////
-			/*
-			this.speaker = new SenderSpeaker(fileLocation, server, port, true);
-			*/
+			this.deconstructor = new SenderDeconstructor(fileLocation, server_ip, port, this);
 			/* open connection if possible */
-			/*
-			if (!this.speaker.tcpConnect(password)) {
+			if (!this.deconstructor.connect()) {
 				return;
 			}
-			*/
-
-			/*
-			this.listener = new SenderListener(this.speaker.getSocketChannel(), this, fileLocation);
-			Thread thread = new Thread(listener);
-			thread.start();
-			*/
-			connected = true;
-
 
 			btnConnectSend.setEnabled(false);
 			btnDisconnect.setEnabled(true);
@@ -246,37 +218,9 @@ public class Sender extends JFrame implements ActionListener {
 			tfServerIP.setEditable(false);
 			tfPortNo.setEditable(false);
 
-			if (connected) {
-				/* Sending message */
-				String rname = tfLocation.getText();
-				this.appendTCP(rname);
-				/*
-				if (speaker.sendString(mtext, rname)) {
-					this.append(this.myName + " to " + rname + ": " + mtext + "\n");
-				} else {
-					this.append("Some error sending message\n");
-				}
-					
-				tfLocation.setText(giveLoc);
-				*/
-				return;
-			} else {
-				/* broken connection, attempt to reconnect */
-			}
+			String rname = tfLocation.getText();
+			this.appendTCP(rname + "\n");
 		}
-	}
-
-	public static String getPassword() {
-		String line = null;
-		Console cons = null;
-		char[] passwd = null;
-
-		if ((cons = System.console()) != null &&
-				(passwd = cons.readPassword()) != null) {
-			line = new String(passwd);
-			java.util.Arrays.fill(passwd, ' ');
-		}
-		return line;
 	}
 
     public static void main(String[] args)  {

@@ -21,7 +21,7 @@ public class ReceiverConstructor implements Runnable {
 			e.printStackTrace();
 		}
 
-		receiver.appendUDP("Setting up UDP channel for receiving file");
+		receiver.appendUDP("Setting up UDP channel for receiving file\n");
 		
 		DatagramSocket dSocket = dChannel.socket();
 		try {
@@ -35,21 +35,25 @@ public class ReceiverConstructor implements Runnable {
 		}
 
 		try {
+			this.dChannel.configureBlocking(false);
 			this.dChannel.register(selector, SelectionKey.OP_READ);
 			this.sChannel.register(selector, SelectionKey.OP_READ);
 		} catch (ClosedChannelException e) {
 			System.out.printf("Closed Channel Exception\n");
 			e.printStackTrace();
+		} catch (IOException e) {
+			System.out.printf("IOException\n");
+			e.printStackTrace();
 		}
 
-		receiver.appendUDP("Set up UDP channel for receiving file");
+		receiver.appendUDP("Set up UDP channel for receiving file\n");
 	}
 
 	public void run() {
 		try {
 			go();
 		} catch (Exception e) {
-			receiver.appendTCP("Some exeption while receiving file");
+			receiver.appendTCP("Some exeption while receiving file\n");
 		}
 	}
 
@@ -75,9 +79,9 @@ public class ReceiverConstructor implements Runnable {
 					continue;
 				}
 				if (key.channel() == dChannel) {
-					this.receiver.appendUDP("Reading from dChannel");
+					this.receiver.appendUDP("Reading from dChannel\n");
 				} else if (key.channel() == sChannel) {
-					this.receiver.appendTCP("Reading from sChannel");
+					this.receiver.appendTCP("Reading from sChannel\n");
 				} else {
 					System.err.printf("well, this is weird\n");
 				}
