@@ -7,6 +7,6 @@
 <listEntry value="1"/>
 </listAttribute>
 <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="quoteclient.QuoteClient"/>
-<stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="146.232.50.214"/>
+<stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="localhost"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="Tut2"/>
 </launchConfiguration>

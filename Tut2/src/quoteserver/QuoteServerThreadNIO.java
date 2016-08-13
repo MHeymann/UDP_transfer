@@ -43,6 +43,13 @@ public class QuoteServerThreadNIO extends Thread {
 	{
 		try {
 			this.in = new BufferedReader(new FileReader(fileName));
+			File file = new File("tale.txt");
+			if(file.exists()){
+				double bytes = file.length();
+				System.out.println("bytes : " + bytes);
+			}else{
+					 System.out.println("File does not exist!");
+			}
 		} catch (FileNotFoundException e) {
 			System.err.printf("Could not open quote file. Serving time instead\n");
 			this.in = null;
@@ -95,7 +102,7 @@ public class QuoteServerThreadNIO extends Thread {
 			address = new InetSocketAddress(ports[i]);
 			dSocket.bind(address);
 
-			cation
+			//cation
 			key = dChannel.register(selector, SelectionKey.OP_READ);
 
 			System.out.printf("Going to listen on %d\n", ports[i]);
@@ -106,7 +113,6 @@ public class QuoteServerThreadNIO extends Thread {
 		
 		while (moreQuotes) {
 			num = selector.select();
-
 			selectedKeys = null;
 			selectedKeys = selector.selectedKeys();
 			it = null;
@@ -149,7 +155,7 @@ public class QuoteServerThreadNIO extends Thread {
 						 * and "port" */
 						dChannel.send(bb, address);
 						System.out.printf("\n");
-						StringBuilder line = new StringBuilder("[");
+						/*StringBuilder line = new StringBuilder("[");
 						for (i = 0; i < 100; i++) {
 							line.append(" ");
 						}
@@ -158,7 +164,7 @@ public class QuoteServerThreadNIO extends Thread {
 							line.setCharAt(i + 1, '|');
 							System.out.printf("\r%s", line.toString());
 
-						}
+						}*/
 						System.out.printf("\nSent\n");
 					} catch (IOException e) {
 						System.err.printf("Something weird in moreQuotes loop\n");
