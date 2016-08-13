@@ -159,27 +159,6 @@ public class Sender extends JFrame implements ActionListener {
 		taUDP.setCaretPosition(taTCP.getText().length() - 1);
 	}
 
-	/*
-	public void showOnlineUsers(Set<String> users) {
-		int i;
-		String[] userArray = new String[users.size()];
-
-		i = 0;
-		for (String s: users){
-			userArray[i] = s;
-			i++;
-		}
-
-		Arrays.sort(userArray);
-
-		taUDP.setText("");
-		taUDP.append("Online Users:\n");
-		for (String s: userArray) {
-			taUDP.append(s + "\n");
-		}
-	}
-
-	*/
 	public void breakConnection() {
 		btnConnectSend.setEnabled(true);
 		btnDisconnect.setEnabled(false);
@@ -240,6 +219,7 @@ public class Sender extends JFrame implements ActionListener {
 			}
 			this.myName = fileLocation;
 			
+			/////////////////////////////////////////////////////
 			/*
 			this.speaker = new SenderSpeaker(fileLocation, server, port, true);
 			*/
