@@ -19,7 +19,8 @@ public class ReceiverListener implements Runnable {
 		try {
 			go();
 		} catch (Exception e) {
-			this.receiver.appendTCP("Some problem in Receive Listener");
+			this.receiver.appendTCP("Some problem in Receive Listener\n");
+			e.printStackTrace();
 		}
 	}
 
@@ -48,7 +49,7 @@ public class ReceiverListener implements Runnable {
 		serverSocket.bind(address);
 		key = serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);
 		
-		this.receiver.appendTCP("Listening on " + this.port);
+		this.receiver.appendTCP("Listening on " + this.port + "\n");
 
 		while (true) {
 			num = selector.select();
@@ -71,11 +72,11 @@ public class ReceiverListener implements Runnable {
 					socketChannel.configureBlocking(false);
 					
 					(new Thread(new ReceiverConstructor(socketChannel, this.receiver))).start();
-					this.receiver.appendTCP("New TCP connection from " + socketChannel.toString());
+					this.receiver.appendTCP("New TCP connection from " + socketChannel.toString() + "\n");
 					it.remove();
 				} else if ((key.readyOps() & SelectionKey.OP_READ)
 						== SelectionKey.OP_READ) {
-					this.receiver.appendTCP("This is thoroughly weird");
+					this.receiver.appendTCP("This is thoroughly weird\n");
 					it.remove();
 				}
 			}
