@@ -20,5 +20,5 @@ tale.txt
 
 *.swp
 
-.metadata
+.metadata/*
 
