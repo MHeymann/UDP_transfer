@@ -15,11 +15,12 @@ public class ReceiverConstructor implements Runnable {
 	private PriorityQueue<Packet> pq = null;
 
 	public ReceiverConstructor(SocketChannel sChannel, Receiver receiver) {
-		int port = receiver.getPort();
 		this.receiver = receiver;
 		this.sChannel = sChannel;
+		int port = receiver.getPort();
 		try {
 			this.dChannel = DatagramChannel.open();
+			this.dChannel.configureBlocking(false);
 			this.selector = Selector.open();
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -33,25 +34,13 @@ public class ReceiverConstructor implements Runnable {
 		} catch (SocketException e) {
 			System.out.printf("Socket Exception\n");
 			e.printStackTrace();
-			/*
-		} catch (IOException e) {
-			System.out.printf("IOException\n");
-			e.printStackTrace();
-			*/
 		}
 
 		try {
-			this.dChannel.configureBlocking(false);
-			/*
-			this.sChannel.configureBlocking(false);
-			*/
-			this.dChannel.register(selector, SelectionKey.OP_READ);
-			this.sChannel.register(selector, SelectionKey.OP_READ);
+			this.dChannel.register(this.selector, SelectionKey.OP_READ);
+			this.sChannel.register(this.selector, SelectionKey.OP_READ);
 		} catch (ClosedChannelException e) {
 			System.out.printf("Closed Channel Exception\n");
-			e.printStackTrace();
-		} catch (IOException e) {
-			System.out.printf("IOException\n");
 			e.printStackTrace();
 		}
 		receiver.appendUDP("Set up UDP channel for receiving file\n");
@@ -81,15 +70,14 @@ public class ReceiverConstructor implements Runnable {
 
 		System.out.println("Let's go while(d)!");
 		while (true) {
+			System.out.println(this.sChannel);
 			n = this.selector.select();
-			System.out.printf("selected %d\n", n);
 
 			selectedKeys = null;	
-			selectedKeys = selector.selectedKeys();
+			selectedKeys = this.selector.selectedKeys();
 			it = null;
 			it = selectedKeys.iterator();
 
-			System.out.printf("OO look, another while!\n");
 			while(it.hasNext()) {
 				key = it.next();
 				System.out.printf("got key\n");
@@ -102,9 +90,7 @@ public class ReceiverConstructor implements Runnable {
 				if (key.channel() == dChannel) {
 					this.receiver.appendUDP("Reading from dChannel\n");
 					buffer.clear();
-					System.out.printf("meep\n");
 					dChannel.receive(buffer);
-					System.out.printf("moop\n");
 					buffer.flip();
 					int seqNo = buffer.getInt();
 					int size = buffer.getInt();
@@ -117,7 +103,9 @@ public class ReceiverConstructor implements Runnable {
 
 
 				} else if (key.channel() == sChannel) {
+					System.out.printf("posting to gui\n");
 					this.receiver.appendTCP("Reading from sChannel\n");
+					System.out.printf("Reading from sChannel\n");
 					buffer.clear();
 					int r = this.sChannel.read(buffer);
 					System.out.printf("Read %d bytes\n", r);

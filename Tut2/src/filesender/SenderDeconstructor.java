@@ -78,9 +78,8 @@ public class SenderDeconstructor implements Runnable {
 			
 			sendBuff.flip();
 
-			this.address = new InetSocketAddress(this.IP_Address, this.port + 1);
 			try {
-				this.datagramChannel.send(sendBuff, this.address);
+				this.datagramChannel.send(sendBuff, new InetSocketAddress(this.IP_Address, this.port + 1));
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -88,15 +87,23 @@ public class SenderDeconstructor implements Runnable {
 		}
 		System.out.printf("For loop done\n");
 		
+		/*
 		sequenceNo--;
+		*/
 		sendBuff.clear();
+		sendBuff.putInt(1);
 		sendBuff.flip();
 		
 		
 		try {
+			Thread.sleep(1000);
+		} catch (Exception e) {
+		}
+		try {
 			System.out.printf("Ping!!\n");
 			this.socketChannel.write(sendBuff);
 			System.out.printf("Pinged!!\n");
+			System.out.println(socketChannel);
 			selector.select();
 			System.out.printf("selected!!\n");
 			readBuff.clear();
@@ -126,9 +133,9 @@ public class SenderDeconstructor implements Runnable {
 		try {
 			this.selector = Selector.open();
 			this.datagramChannel = DatagramChannel.open();
-			this.datagramChannel.configureBlocking(false);
 			this.socketChannel = SocketChannel.open();
 			this.socketChannel.configureBlocking(false);
+			this.datagramChannel.configureBlocking(false);
 			this.address = new InetSocketAddress(this.IP_Address, this.port);
 			this.socketChannel.connect(this.address);
 			while (!this.socketChannel.finishConnect());
@@ -138,8 +145,10 @@ public class SenderDeconstructor implements Runnable {
 		}
 		sender.appendTCP("Set up TCP connection\n");
 
+		/*
 		DatagramSocket dSocket = datagramChannel.socket();
 		this.address = new InetSocketAddress(this.IP_Address, this.port + 1);
+		*/
 		/* TODO: since we arent receiving back, is it necessary to bind? */
 		/*
 		try {
