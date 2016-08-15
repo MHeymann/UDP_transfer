@@ -4,6 +4,7 @@ import java.nio.channels.*;
 import java.io.IOException;
 import java.util.*;
 import java.net.*;
+import parameters.*;
 
 public class ReceiverConstructor implements Runnable {
 	private Receiver receiver = null;
@@ -62,6 +63,11 @@ public class ReceiverConstructor implements Runnable {
 		Set<SelectionKey> selectedKeys = null;
 		Iterator<SelectionKey> it = null;
 		SelectionKey key = null;
+		ByteBuffer buffer = ByteBuffer.allocate(Parameters.BUFFER_SIZE);
+		/*
+		InetSocketAddress address = null;
+		*/
+
 		while (true) {
 			this.selector.select();
 
@@ -79,6 +85,13 @@ public class ReceiverConstructor implements Runnable {
 					continue;
 				}
 				if (key.channel() == dChannel) {
+					dChannel.receive(buffer);
+					buffer.flip();
+					int seqNo = buffer.getInt();
+					long size = buffer.getInt();
+					byte[] data = null;
+					buffer.get(data, 0, (int)size);
+					Packet packet = new Packet(bla bla bla);
 					this.receiver.appendUDP("Reading from dChannel\n");
 				} else if (key.channel() == sChannel) {
 					this.receiver.appendTCP("Reading from sChannel\n");

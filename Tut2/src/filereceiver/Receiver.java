@@ -81,8 +81,8 @@ public class Receiver extends JFrame implements ActionListener {
 		this.add(northPanel, BorderLayout.NORTH);
 
 		/* The CenterPanel where info about datatransfer is displayed */
-		taTCP = new JTextArea("TCP message area:\n", 80, 80);
-		taUDP = new JTextArea("UDP message area:\n", 80, 80);
+		taTCP = new JTextArea("TCP message area:\n", 80, 50);
+		taUDP = new JTextArea("UDP message area:\n", 80, 50);
 		JPanel centerPanel = new JPanel(new GridLayout(1,1));
 		centerPanel.add(new JScrollPane(taTCP));
 		centerPanel.add(new JScrollPane(taUDP));
@@ -101,7 +101,7 @@ public class Receiver extends JFrame implements ActionListener {
 		this.add(southPanel, BorderLayout.SOUTH);
 
 		this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-		this.setSize(800, 600);
+		this.setSize(1200, 600);
 		this.setVisible(true);
 
 		(new Thread(listener)).start();

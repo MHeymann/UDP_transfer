@@ -20,5 +20,8 @@ tale.txt
 
 *.swp
 
-.metadata
+.metadata/*
+.recommenders/*
+*/.metadata/*
+*/.recommenders/*
 

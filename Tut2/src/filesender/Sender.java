@@ -36,8 +36,6 @@ public class Sender extends JFrame implements ActionListener {
 
 	private SenderDeconstructor deconstructor = null;
 
-	private String myName = null;
-
 	/* The port to connect to */
 	private int portNo = -1;
 	/* The host ip address */
@@ -45,6 +43,9 @@ public class Sender extends JFrame implements ActionListener {
 
 	/* Create a file chooser */
 	private JFileChooser fc = null;
+
+	private String fileLocationString = "";
+	private long sendFileSize = -1;
 	
 	public Sender(String host, int port) {
 		super("Send File");
@@ -107,8 +108,8 @@ public class Sender extends JFrame implements ActionListener {
 		 * The CenterPanel where chat's are displayed and online users
 		 * shown
 		 */
-		taTCP = new JTextArea("TCP message area:\n", 80, 80);
-		taUDP = new JTextArea("UDP message area:\n", 80, 80);
+		taTCP = new JTextArea("TCP message area:\n", 80, 50);
+		taUDP = new JTextArea("UDP message area:\n", 80, 50);
 		JPanel centerPanel = new JPanel(new GridLayout(1,1));
 		centerPanel.add(new JScrollPane(taTCP));
 		centerPanel.add(new JScrollPane(taUDP));
@@ -132,7 +133,7 @@ public class Sender extends JFrame implements ActionListener {
 		this.add(southPanel, BorderLayout.SOUTH);
 
 		this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-		this.setSize(800, 600);
+		this.setSize(1200, 600);
 		this.setVisible(true);
 
 		tfLocation.addActionListener(this);
@@ -179,10 +180,15 @@ public class Sender extends JFrame implements ActionListener {
 		} else if (o == btnBrowse) {
 			returnval = fc.showOpenDialog(this);
 			file = fc.getSelectedFile();
-			tfLocation.setText(file.getName());
+			tfLocation.setText(file.getAbsolutePath());
+			fileLocationString = file.getAbsolutePath();
+			sendFileSize = file.length();
+			//xxxx
 		} else if (o == btnConnectSend) {
-			String fileLocation = tfLocation.getText().trim();
-			if (fileLocation.length() == 0) {
+			/*
+			fileLocationString = tfLocation.getText().trim();
+			*/
+			if (fileLocationString.length() == 0) {
 				return;
 			}
 			
@@ -202,9 +208,9 @@ public class Sender extends JFrame implements ActionListener {
 				System.err.printf("Please provide a valid port number\n");
 				return;
 			}
-			this.myName = fileLocation;
 			
-			this.deconstructor = new SenderDeconstructor(fileLocation, server_ip, port, this);
+			
+			this.deconstructor = new SenderDeconstructor(fileLocationString, sendFileSize, server_ip, port, this);
 			/* open connection if possible */
 			if (!this.deconstructor.connect()) {
 				return;
