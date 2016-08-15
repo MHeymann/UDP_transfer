@@ -37,14 +37,19 @@ public class SenderDeconstructor implements Runnable {
 	public void go() {
 		ByteBuffer sendBuff = ByteBuffer.allocate(Parameters.BUFFER_SIZE);
 		ByteBuffer readBuff = ByteBuffer.allocate(Parameters.DATA_BYTES);
-		FileInputStream fin = null;
-		FileChannel fcin = fin.getChannel();
-
-		try {
-			fin =new FileInputStream(this.fileLocation);
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
+		FileInputStream fin;
+		FileChannel fcin;
+		
+		try{
+			fin = new FileInputStream(this.fileLocation);	
+			fcin = fin.getChannel();
 		}
+		catch (FileNotFoundException e){
+			return;
+		}
+		 
+
+		
 		int r = 0;
 		int sequenceNo = 0;
 
@@ -92,10 +97,13 @@ public class SenderDeconstructor implements Runnable {
 				System.out.println("Seems to be working");
 				
 			}
+			fin.close();
 		} catch (IOException e) {
 			e.printStackTrace();
+			
 		}
-
+		
+		
 	}
 
 	public boolean connect() {
