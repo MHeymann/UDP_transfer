@@ -72,12 +72,11 @@ public class SenderDeconstructor implements Runnable {
 			
 			sendBuff.putInt(sequenceNo);
 			sendBuff.putInt(r);
+			readBuff.flip();
 			sendBuff.put(readBuff);
 
 			
 			sendBuff.flip();
-			/* probably unnecessary */
-			readBuff.flip();
 
 			this.address = new InetSocketAddress(this.IP_Address, this.port + 1);
 			try {

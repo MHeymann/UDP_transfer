@@ -120,7 +120,7 @@ public class Receiver extends JFrame implements ActionListener {
 	public void appendUDP(String s) 
 	{
 		taUDP.append(s);
-		taUDP.setCaretPosition(taTCP.getText().length() - 1);
+		taUDP.setCaretPosition(taUDP.getText().length() - 1);
 	}
 
 	public void breakConnection() {

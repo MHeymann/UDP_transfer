@@ -64,6 +64,7 @@ public class ReceiverConstructor implements Runnable {
 			go();
 		} catch (Exception e) {
 			receiver.appendTCP("Some exception while receiving file\n");
+			e.printStackTrace();
 		}
 	}
 
@@ -80,8 +81,8 @@ public class ReceiverConstructor implements Runnable {
 
 		System.out.println("Let's go while(d)!");
 		while (true) {
-			this.selector.select();
-			System.out.printf("selected\n");
+			n = this.selector.select();
+			System.out.printf("selected %d\n", n);
 
 			selectedKeys = null;	
 			selectedKeys = selector.selectedKeys();
@@ -91,7 +92,7 @@ public class ReceiverConstructor implements Runnable {
 			System.out.printf("OO look, another while!\n");
 			while(it.hasNext()) {
 				key = it.next();
-				System.out.printf
+				System.out.printf("got key\n");
 				if ((key.readyOps() & SelectionKey.OP_READ) 
 						!= SelectionKey.OP_READ) {
 					System.out.printf("this shouldn't happen\n");
@@ -101,13 +102,15 @@ public class ReceiverConstructor implements Runnable {
 				if (key.channel() == dChannel) {
 					this.receiver.appendUDP("Reading from dChannel\n");
 					buffer.clear();
+					System.out.printf("meep\n");
 					dChannel.receive(buffer);
+					System.out.printf("moop\n");
 					buffer.flip();
 					int seqNo = buffer.getInt();
 					int size = buffer.getInt();
-					System.out.printf("seq no %d, size %d\n", seqNo, size);
-					byte[] data = null;
-					buffer.get(data, 0, (int)size);
+					System.out.printf("seq no %d, size %d, remaining %d\n", seqNo, size, buffer.remaining());
+					byte[] data = new byte[size];
+					buffer.get(data, 0, size);
 					Packet packet = new Packet(seqNo, size, data);
 
 					this.pq.add(packet);
