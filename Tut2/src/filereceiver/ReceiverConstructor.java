@@ -11,6 +11,7 @@ public class ReceiverConstructor implements Runnable {
 	private SocketChannel sChannel = null;
 	private DatagramChannel dChannel = null;
 	private Selector selector = null;
+	private PriorityQueue<Packet> pq = null;
 
 	public ReceiverConstructor(SocketChannel sChannel, Receiver receiver) {
 		this.receiver = receiver;
@@ -46,8 +47,9 @@ public class ReceiverConstructor implements Runnable {
 			System.out.printf("IOException\n");
 			e.printStackTrace();
 		}
-
 		receiver.appendUDP("Set up UDP channel for receiving file\n");
+
+		this.pq = new PriorityQueue<Packet>();
 	}
 
 	public void run() {
@@ -88,13 +90,24 @@ public class ReceiverConstructor implements Runnable {
 					dChannel.receive(buffer);
 					buffer.flip();
 					int seqNo = buffer.getInt();
-					long size = buffer.getInt();
+					int size = buffer.getInt();
 					byte[] data = null;
 					buffer.get(data, 0, (int)size);
-					Packet packet = new Packet(bla bla bla);
+					Packet packet = new Packet(seqNo, size, data);
+
+					this.pq.add(packet)
+
 					this.receiver.appendUDP("Reading from dChannel\n");
+
 				} else if (key.channel() == sChannel) {
 					this.receiver.appendTCP("Reading from sChannel\n");
+					buffer.clear();
+					this.sChannel.read(buffer);
+					buffer.clear();
+					buffer.putInt(this.pq.size());
+					buffer.flip();
+					this.schannel.write(buffer);
+					
 				} else {
 					System.err.printf("well, this is weird\n");
 				}
