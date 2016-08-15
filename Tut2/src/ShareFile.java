@@ -15,17 +15,12 @@ import java.awt.*;
 import java.awt.event.*;
 
 /*
- * Author Murray Heymann
+ * Author Murray Heymann & Ludwe Mtakati
  *
  * This file is starts the client.  If it is started in gui mode, the swing
  * components are created and managed from here.  Threads for incoming and
  * outgoing data are created from here.  
  *
- * "LAFAYETTE!
- * I'm taking this horse
- * by the reins making
- * Redcoats redder with bloodstains"
- * Guns And Ships, Hamilton
  */
 public class ShareFile extends JFrame implements ActionListener {
 
@@ -64,7 +59,7 @@ public class ShareFile extends JFrame implements ActionListener {
 		receiverPortPanel.add(new JLabel("Port Number:  "));
 		receiverPortPanel.add(tfPortNo);
 		receiverPortPanel.add(new JLabel(""));
-		/* put all of this in the north pannel */
+		/* put all of this in the north panel */
 		northPanel.add(receiverPortPanel);
 
 		/* The label and text field for communication */

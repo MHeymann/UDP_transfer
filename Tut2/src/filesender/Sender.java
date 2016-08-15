@@ -45,7 +45,7 @@ public class Sender extends JFrame implements ActionListener {
 	private JFileChooser fc = null;
 
 	private String fileLocationString = "";
-	private long sendFileSize = -1;
+	private int sendFileSize = -1;
 	
 	public Sender(String host, int port) {
 		super("Send File");
@@ -182,7 +182,7 @@ public class Sender extends JFrame implements ActionListener {
 			file = fc.getSelectedFile();
 			tfLocation.setText(file.getAbsolutePath());
 			fileLocationString = file.getAbsolutePath();
-			sendFileSize = file.length();
+			sendFileSize = (int) file.length();
 			//xxxx
 		} else if (o == btnConnectSend) {
 			/*
@@ -215,7 +215,9 @@ public class Sender extends JFrame implements ActionListener {
 			if (!this.deconstructor.connect()) {
 				return;
 			}
-
+				
+			(new Thread(this.deconstructor)).start();
+			
 			btnConnectSend.setEnabled(false);
 			btnDisconnect.setEnabled(true);
 			tfLocation.setEditable(false);

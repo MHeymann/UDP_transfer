@@ -54,7 +54,7 @@ public class ReceiverConstructor implements Runnable {
 		try {
 			go();
 		} catch (Exception e) {
-			receiver.appendTCP("Some exeption while receiving file\n");
+			receiver.appendTCP("Some exception while receiving file\n");
 		}
 	}
 

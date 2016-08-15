@@ -8,7 +8,7 @@ import parameters.*;
 
 public class SenderDeconstructor implements Runnable {
 	private String fileLocation = null;
-	private long fileSize = -1;
+	private int fileSize = -1;
 	private String IP_Address = null;
 	private Sender sender = null;
 	private int port = -1;
@@ -18,7 +18,7 @@ public class SenderDeconstructor implements Runnable {
 	private InetSocketAddress address = null;
 	private Selector selector = null;
 
-	public SenderDeconstructor(String fileLocation, long fileSize, String IP_Address, int port, Sender sender) 
+	public SenderDeconstructor(String fileLocation, int fileSize, String IP_Address, int port, Sender sender) 
 	{
 		this.fileLocation = fileLocation;
 		this.fileSize = fileSize;
@@ -76,6 +76,24 @@ public class SenderDeconstructor implements Runnable {
 				e.printStackTrace();
 			}
 
+		}
+		
+		sequenceNo--;
+		sendBuff.clear();
+		sendBuff.flip();
+		
+		
+		try {
+			this.socketChannel.write(sendBuff);
+			selector.select();
+			r = socketChannel.read(readBuff);
+			r = readBuff.getInt();
+			if(r == sequenceNo){
+				System.out.println("Seems to be working");
+				
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 
 	}
