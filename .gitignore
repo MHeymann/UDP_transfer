@@ -22,4 +22,6 @@ tale.txt
 
 .metadata/*
 .recommenders/*
+*/.metadata/*
+*/.recommenders/*
 
