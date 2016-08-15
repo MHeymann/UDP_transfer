@@ -2,10 +2,10 @@ package packet;
 
 public class Packet implements Comparable<Packet> {
 	private int sequenceNumber = -1;
-	private long size = -1;
+	private int size = -1;
 	private byte[] data = null;
 
-	public Packet (int sequenceNumber, long size, byte[] data) {
+	public Packet (int sequenceNumber, int size, byte[] data) {
 		this.sequenceNumber = sequenceNumber;
 		this.size = size;
 		this.data = data;

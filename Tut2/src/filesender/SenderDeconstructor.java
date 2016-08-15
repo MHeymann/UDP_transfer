@@ -57,13 +57,15 @@ public class SenderDeconstructor implements Runnable {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
+			if(r == -1) {
+				break;
+			}
+			
 			sendBuff.putInt(sequenceNo);
 			sendBuff.putInt(r);
 			sendBuff.put(readBuff);
 
-			if(r == -1) {
-				break;
-			}
+			
 			sendBuff.flip();
 			/* probably unnecessary */
 			readBuff.flip();

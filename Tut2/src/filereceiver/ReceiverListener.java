@@ -1,8 +1,7 @@
 package filereceiver;
 
 import java.net.*;
-import java.io.*;
-import java.nio.*;
+
 import java.nio.channels.*;
 import java.util.*;
 
@@ -26,7 +25,6 @@ public class ReceiverListener implements Runnable {
 
 	public void go() throws Exception
 	{
-		int num;
 		ServerSocketChannel serverSocketChannel = null;
 		SocketChannel socketChannel = null;
 		Selector selector = null;
@@ -35,7 +33,7 @@ public class ReceiverListener implements Runnable {
 		SelectionKey key = null;
 		Set<SelectionKey> selectedKeys = null;
 		Iterator<SelectionKey> it = null;
-		SelectionKey newKey = null;
+
 		
 
 		selector = Selector.open();
@@ -52,7 +50,7 @@ public class ReceiverListener implements Runnable {
 		this.receiver.appendTCP("Listening on " + this.port + "\n");
 
 		while (true) {
-			num = selector.select();
+		selector.select();
 			
 			selectedKeys = null;
 			selectedKeys = selector.selectedKeys();
