@@ -15,6 +15,7 @@ public class ReceiverConstructor implements Runnable {
 	private PriorityQueue<Packet> pq = null;
 
 	public ReceiverConstructor(SocketChannel sChannel, Receiver receiver) {
+		int port = receiver.getPort();
 		this.receiver = receiver;
 		this.sChannel = sChannel;
 		try {
@@ -28,17 +29,22 @@ public class ReceiverConstructor implements Runnable {
 		
 		DatagramSocket dSocket = dChannel.socket();
 		try {
-			dSocket.bind(sChannel.getRemoteAddress());
+			dSocket.bind(new InetSocketAddress(port + 1));
 		} catch (SocketException e) {
 			System.out.printf("Socket Exception\n");
 			e.printStackTrace();
+			/*
 		} catch (IOException e) {
 			System.out.printf("IOException\n");
 			e.printStackTrace();
+			*/
 		}
 
 		try {
 			this.dChannel.configureBlocking(false);
+			/*
+			this.sChannel.configureBlocking(false);
+			*/
 			this.dChannel.register(selector, SelectionKey.OP_READ);
 			this.sChannel.register(selector, SelectionKey.OP_READ);
 		} catch (ClosedChannelException e) {
@@ -67,20 +73,25 @@ public class ReceiverConstructor implements Runnable {
 		Iterator<SelectionKey> it = null;
 		SelectionKey key = null;
 		ByteBuffer buffer = ByteBuffer.allocate(Parameters.BUFFER_SIZE);
+		int n;
 		/*
 		InetSocketAddress address = null;
 		*/
 
+		System.out.println("Let's go while(d)!");
 		while (true) {
 			this.selector.select();
+			System.out.printf("selected\n");
 
 			selectedKeys = null;	
 			selectedKeys = selector.selectedKeys();
 			it = null;
 			it = selectedKeys.iterator();
 
+			System.out.printf("OO look, another while!\n");
 			while(it.hasNext()) {
 				key = it.next();
+				System.out.printf
 				if ((key.readyOps() & SelectionKey.OP_READ) 
 						!= SelectionKey.OP_READ) {
 					System.out.printf("this shouldn't happen\n");
@@ -88,26 +99,30 @@ public class ReceiverConstructor implements Runnable {
 					continue;
 				}
 				if (key.channel() == dChannel) {
+					this.receiver.appendUDP("Reading from dChannel\n");
+					buffer.clear();
 					dChannel.receive(buffer);
 					buffer.flip();
 					int seqNo = buffer.getInt();
 					int size = buffer.getInt();
+					System.out.printf("seq no %d, size %d\n", seqNo, size);
 					byte[] data = null;
 					buffer.get(data, 0, (int)size);
 					Packet packet = new Packet(seqNo, size, data);
 
 					this.pq.add(packet);
 
-					this.receiver.appendUDP("Reading from dChannel\n");
 
 				} else if (key.channel() == sChannel) {
 					this.receiver.appendTCP("Reading from sChannel\n");
 					buffer.clear();
-					this.sChannel.read(buffer);
+					int r = this.sChannel.read(buffer);
+					System.out.printf("Read %d bytes\n", r);
 					buffer.clear();
 					buffer.putInt(this.pq.size());
 					buffer.flip();
 					this.sChannel.write(buffer);
+					System.out.printf("pq size is %d\n", this.pq.size());
 					
 				} else {
 					System.err.printf("well, this is weird\n");

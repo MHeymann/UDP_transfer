@@ -39,6 +39,7 @@ public class SenderDeconstructor implements Runnable {
 		ByteBuffer readBuff = ByteBuffer.allocate(Parameters.DATA_BYTES);
 		FileInputStream fin;
 		FileChannel fcin;
+		System.out.printf("Go()\n");
 		
 		try{
 			fin = new FileInputStream(this.fileLocation);	
@@ -53,16 +54,19 @@ public class SenderDeconstructor implements Runnable {
 		int r = 0;
 		int sequenceNo = 0;
 
+		System.out.printf("For loop\n");
 		for (sequenceNo = 0; true; sequenceNo++) {
 			sendBuff.clear();
 			readBuff.clear();
 
+			System.out.printf("Reading\n");
 			try {
 				r = fcin.read(readBuff);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 			if(r == -1) {
+				System.out.printf("Done reading\n");
 				break;
 			}
 			
@@ -75,6 +79,7 @@ public class SenderDeconstructor implements Runnable {
 			/* probably unnecessary */
 			readBuff.flip();
 
+			this.address = new InetSocketAddress(this.IP_Address, this.port + 1);
 			try {
 				this.datagramChannel.send(sendBuff, this.address);
 			} catch (IOException e) {
@@ -82,6 +87,7 @@ public class SenderDeconstructor implements Runnable {
 			}
 
 		}
+		System.out.printf("For loop done\n");
 		
 		sequenceNo--;
 		sendBuff.clear();
@@ -89,31 +95,42 @@ public class SenderDeconstructor implements Runnable {
 		
 		
 		try {
+			System.out.printf("Ping!!\n");
 			this.socketChannel.write(sendBuff);
+			System.out.printf("Pinged!!\n");
 			selector.select();
+			System.out.printf("selected!!\n");
+			readBuff.clear();
 			r = socketChannel.read(readBuff);
+			System.out.printf("read %d bytes\n", r);
+			readBuff.flip();
 			r = readBuff.getInt();
+			System.out.printf("read: %d sent: %d\n", r, sequenceNo);
 			if(r == sequenceNo){
 				System.out.println("Seems to be working");
 				
+			} else {
+				System.out.printf("Apparently not working\n");
 			}
 			fin.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 			
 		}
+
+		System.out.printf("Done sending file\n");
 		
 		
 	}
 
 	public boolean connect() {
-		this.address = new InetSocketAddress(this.IP_Address, this.port);
 		try {
 			this.selector = Selector.open();
 			this.datagramChannel = DatagramChannel.open();
 			this.datagramChannel.configureBlocking(false);
 			this.socketChannel = SocketChannel.open();
 			this.socketChannel.configureBlocking(false);
+			this.address = new InetSocketAddress(this.IP_Address, this.port);
 			this.socketChannel.connect(this.address);
 			while (!this.socketChannel.finishConnect());
 		} catch (IOException e) {
@@ -123,13 +140,16 @@ public class SenderDeconstructor implements Runnable {
 		sender.appendTCP("Set up TCP connection\n");
 
 		DatagramSocket dSocket = datagramChannel.socket();
+		this.address = new InetSocketAddress(this.IP_Address, this.port + 1);
 		/* TODO: since we arent receiving back, is it necessary to bind? */
+		/*
 		try {
 			dSocket.bind(this.address);
 		} catch (SocketException e) {
 			System.out.printf("Socket Exception\n");
 			e.printStackTrace();
 		}
+		*/
 
 		try {
 			this.datagramChannel.register(selector, SelectionKey.OP_READ);

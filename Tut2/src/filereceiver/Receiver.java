@@ -107,6 +107,10 @@ public class Receiver extends JFrame implements ActionListener {
 		(new Thread(listener)).start();
 	}
 
+	public int getPort() {
+		return this.portNo;
+	}
+
 	public void appendTCP(String s) 
 	{
 		taTCP.append(s);
