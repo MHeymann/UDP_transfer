@@ -1,5 +1,6 @@
 package filereceiver;
 import java.nio.*;
+import packet.*;
 import java.nio.channels.*;
 import java.io.IOException;
 import java.util.*;
@@ -95,7 +96,7 @@ public class ReceiverConstructor implements Runnable {
 					buffer.get(data, 0, (int)size);
 					Packet packet = new Packet(seqNo, size, data);
 
-					this.pq.add(packet)
+					this.pq.add(packet);
 
 					this.receiver.appendUDP("Reading from dChannel\n");
 
@@ -106,7 +107,7 @@ public class ReceiverConstructor implements Runnable {
 					buffer.clear();
 					buffer.putInt(this.pq.size());
 					buffer.flip();
-					this.schannel.write(buffer);
+					this.sChannel.write(buffer);
 					
 				} else {
 					System.err.printf("well, this is weird\n");
