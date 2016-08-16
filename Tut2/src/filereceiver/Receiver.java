@@ -152,7 +152,7 @@ public class Receiver extends JFrame implements ActionListener {
 
     public static void main(String[] args)  {
 		Receiver receiver = null;
-		receiver = new Receiver("localhost", 8002);
+		receiver = new Receiver("localhost", 8000);
 		System.out.printf("made a receiver\n");
 	}
 }

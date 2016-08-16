@@ -241,7 +241,7 @@ public class Sender extends JFrame implements ActionListener {
 
     public static void main(String[] args)  {
 		Sender sender = null;
-		sender = new Sender("localhost", 8002);
+		sender = new Sender("localhost", 8000);
 		System.out.printf("made a sender\n");
 	}
 }

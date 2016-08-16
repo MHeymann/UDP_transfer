@@ -138,6 +138,6 @@ EXIT_ON_CLOSE
 
     public static void main(String[] args)  {
 		ShareFile sender = null;
-		sender = new ShareFile("localhost", 8002);
+		sender = new ShareFile("localhost", 8000);
 	}
 }
