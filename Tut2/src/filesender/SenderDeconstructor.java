@@ -86,7 +86,7 @@ public class SenderDeconstructor implements Runnable {
 				address = new InetSocketAddress(this.IP_Address, destPort);
 
 				if (i % 100 == 0) {
-
+					packet.sendPacket(this.datagramChannel, address);
 				} else {
 					packet.sendPacket(this.datagramChannel, address);
 				}
