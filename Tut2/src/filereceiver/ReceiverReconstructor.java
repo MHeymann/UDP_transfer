@@ -158,7 +158,8 @@ public class ReceiverReconstructor implements Runnable {
 								expectHigh = r;
 								if (r == -1) {
 									System.exit(0);
-								}
+								} 
+								System.out.printf("Ping registered\n");
 								pingback = true;
 							}
 						} else {
