@@ -50,7 +50,6 @@ public class Receiver extends JFrame implements ActionListener {
 		/* TODO:figure out here how to get my IP */
 		this.hostAddress = host;
 		this.fc = new JFileChooser();
-		this.listener = new ReceiverListener(this, port);
 
 		/* NorthPanel */
 		JPanel northPanel = new JPanel(new GridLayout(3,1));
@@ -104,6 +103,8 @@ public class Receiver extends JFrame implements ActionListener {
 		this.setSize(1200, 600);
 		this.setVisible(true);
 
+		this.listener = new ReceiverListener(this, port);
+
 		(new Thread(listener)).start();
 	}
 
@@ -113,6 +114,10 @@ public class Receiver extends JFrame implements ActionListener {
 
 	public void appendTCP(String s) 
 	{
+		System.out.printf("hi!\n");
+		System.out.printf("%s\n", s);
+		System.out.println(taTCP);
+		System.out.printf("after null\n");
 		taTCP.append(s);
 		taTCP.setCaretPosition(taTCP.getText().length() - 1);
 	}
