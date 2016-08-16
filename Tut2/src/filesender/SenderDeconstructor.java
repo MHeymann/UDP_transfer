@@ -51,6 +51,7 @@ public class SenderDeconstructor implements Runnable {
 		}
 		
 
+		this.port++;
 		for (sequenceNo = 0; true; sequenceNo++) {
 			sendBuff.clear();
 			readBuff.clear();
@@ -69,12 +70,10 @@ public class SenderDeconstructor implements Runnable {
 			sendBuff.putInt(r);
 			readBuff.flip();
 			sendBuff.put(readBuff);
-
-			
 			sendBuff.flip();
 
 			try {
-				this.datagramChannel.send(sendBuff, new InetSocketAddress(this.IP_Address, this.port + 1));
+				this.datagramChannel.send(sendBuff, new InetSocketAddress(this.IP_Address, this.port + (sequenceNo % Parameters.PORTS)));
 				System.out.printf("sent packet %d\n", sequenceNo);
 			} catch (IOException e) {
 				e.printStackTrace();

@@ -217,12 +217,14 @@ public class Sender extends JFrame implements ActionListener {
 			}
 			
 			(new Thread(this.deconstructor)).start();
+			/*
 			try {
 				Thread.sleep(5000);
 				System.exit(0);
 			} catch (Exception ex) {
 				ex.printStackTrace();
 			}
+			*/
 			
 			btnConnectSend.setEnabled(false);
 			btnDisconnect.setEnabled(true);

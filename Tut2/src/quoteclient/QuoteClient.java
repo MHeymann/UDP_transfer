@@ -30,8 +30,6 @@ public class QuoteClient {
 			}
 		}
 
-
-
 		/* get a datagram socket */
 		socket = new DatagramSocket();
 

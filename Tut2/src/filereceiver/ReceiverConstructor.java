@@ -10,40 +10,32 @@ import parameters.*;
 public class ReceiverConstructor implements Runnable {
 	private Receiver receiver = null;
 	private SocketChannel sChannel = null;
-	private DatagramChannel dChannel = null;
 	private Selector selector = null;
 	private PriorityQueue<Packet> pq = null;
 
 	public ReceiverConstructor(SocketChannel sChannel, Receiver receiver) {
 		this.receiver = receiver;
 		this.sChannel = sChannel;
-		int port = receiver.getPort();
-		try {
-			this.dChannel = DatagramChannel.open();
-			this.dChannel.configureBlocking(false);
-			this.selector = Selector.open();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
+		int port = receiver.getPort() + 1;
+		int i;
+		DatagramChannel dChannel = null;
 		receiver.appendUDP("Setting up UDP channel for receiving file\n");
-		
-		DatagramSocket dSocket = dChannel.socket();
 		try {
-			dSocket.bind(new InetSocketAddress(port + 1));
-		} catch (SocketException e) {
-			System.out.printf("Socket Exception\n");
-			e.printStackTrace();
-		}
+			this.selector = Selector.open();
 
-		try {
-			this.dChannel.register(this.selector, SelectionKey.OP_READ);
+			for (i = 0; i < Parameters.PORTS; i++) {
+				dChannel = DatagramChannel.open();
+				dChannel.configureBlocking(false);
+				DatagramSocket dSocket = dChannel.socket();
+				dSocket.bind(new InetSocketAddress(port + i));
+				dChannel.register(this.selector, SelectionKey.OP_READ);
+			}
+			receiver.appendUDP("Set up UDP channels for receiving file\n");
+
 			this.sChannel.register(this.selector, SelectionKey.OP_READ);
-		} catch (ClosedChannelException e) {
-			System.out.printf("Closed Channel Exception\n");
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		receiver.appendUDP("Set up UDP channel for receiving file\n");
 
 		this.pq = new PriorityQueue<Packet>();
 	}
@@ -63,6 +55,7 @@ public class ReceiverConstructor implements Runnable {
 		Iterator<SelectionKey> it = null;
 		SelectionKey key = null;
 		ByteBuffer buffer = ByteBuffer.allocate(Parameters.BUFFER_SIZE);
+		DatagramChannel dChannel = null;
 		int n;
 		boolean pingback = false;
 		int expectLow = -1;
@@ -94,7 +87,8 @@ public class ReceiverConstructor implements Runnable {
 					it.remove();
 					continue;
 				}
-				if (key.channel() == dChannel) {
+				if (key.channel() instanceof DatagramChannel) {
+					dChannel = (DatagramChannel)key.channel();
 					this.receiver.appendUDP("Reading from dChannel\n");
 					buffer.clear();
 					dChannel.receive(buffer);
@@ -152,6 +146,11 @@ public class ReceiverConstructor implements Runnable {
 			System.out.printf("IOException\n");
 			e.printStackTrace();
 		}
+		Packet p;
+		while ((p = this.pq.poll()) != null){
+			System.out.printf("seqno: %d\n", p.getSeqNum());
+		}
+
 		System.out.printf("pq size is %d\n", this.pq.size());
 	}
 }
