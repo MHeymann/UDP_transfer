@@ -32,7 +32,7 @@ public class Receiver extends JFrame implements ActionListener {
 	/* current connection status */
 	private boolean connected = false;
 	/* The Receiver Listener */
-	private ReceiverListener listener = null;
+	private ReceiverReconstructor recon = null;
 	/* The Receiver Speaker for sending messages to the server */
 	private String myName = null;
 
@@ -50,7 +50,6 @@ public class Receiver extends JFrame implements ActionListener {
 		/* TODO:figure out here how to get my IP */
 		this.hostAddress = host;
 		this.fc = new JFileChooser();
-		this.listener = new ReceiverListener(this, port);
 
 		/* NorthPanel */
 		JPanel northPanel = new JPanel(new GridLayout(3,1));
@@ -104,7 +103,9 @@ public class Receiver extends JFrame implements ActionListener {
 		this.setSize(1200, 600);
 		this.setVisible(true);
 
-		(new Thread(listener)).start();
+		this.recon = new ReceiverReconstructor(this, port);
+
+		(new Thread(recon)).start();
 	}
 
 	public int getPort() {
@@ -113,6 +114,9 @@ public class Receiver extends JFrame implements ActionListener {
 
 	public void appendTCP(String s) 
 	{
+		System.out.printf("hi!\n");
+		System.out.printf("%s\n", s);
+		System.out.printf("after null\n");
 		taTCP.append(s);
 		taTCP.setCaretPosition(taTCP.getText().length() - 1);
 	}
@@ -149,6 +153,6 @@ public class Receiver extends JFrame implements ActionListener {
     public static void main(String[] args)  {
 		Receiver receiver = null;
 		receiver = new Receiver("localhost", 8002);
-		System.out.println("made a receiver");
+		System.out.printf("made a receiver\n");
 	}
 }
