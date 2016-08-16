@@ -98,7 +98,6 @@ public class SenderDeconstructor implements Runnable {
 
 			finish = sequenceNo - 1;
 
-		///xxx	
 			while (!ping(start, finish, sendBuff, readBuff));
 
 			if (r1 == -1) {
@@ -116,6 +115,7 @@ public class SenderDeconstructor implements Runnable {
 	}
 
 	public boolean connect() {
+		ByteBuffer buffer = ByteBuffer.allocate(4);
 		try {
 			this.hMap = new HashMap<Integer, Packet>();
 			this.selector = Selector.open();
@@ -127,6 +127,10 @@ public class SenderDeconstructor implements Runnable {
 			this.socketChannel.connect(this.address);
 			while (!this.socketChannel.finishConnect());
 			this.sender.appendTCP("Set up TCP connection\n");
+			buffer.clear();
+			buffer.putInt(this.fileSize);
+			buffer.flip();
+			this.socketChannel.write(buffer);
 		} catch (IOException e) {
 			sender.appendTCP("IOException: failed to create SocketChannel\n");
 			return false;

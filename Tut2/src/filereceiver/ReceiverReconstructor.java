@@ -21,6 +21,7 @@ public class ReceiverReconstructor implements Runnable {
 	private int expectHigh = -1;
 	private FileChannel fcout = null;
 	private String filePath = "hardcodefile";
+	private int expectedPackets = -1;
 
 	public ReceiverReconstructor(Receiver receiver, int port) {
 		InetSocketAddress address = null;
@@ -41,10 +42,6 @@ public class ReceiverReconstructor implements Runnable {
 			serverSocket.bind(new InetSocketAddress(this.port));
 			key = serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);
 			this.receiver.appendTCP("Listening on " + this.port + "\n");
-			/* NB: this must be after binding the serverSocketChannel address */
-			/*
-			this.port++;
-			*/
 	
 			/* set up the udp channels */
 			receiver.appendUDP("Setting up UDP channel for receiving file\n");
@@ -82,14 +79,16 @@ public class ReceiverReconstructor implements Runnable {
 		ByteBuffer buffer = ByteBuffer.allocate(Parameters.BUFFER_SIZE);
 		int n;
 		boolean pingback = false;
+		boolean receiving = false;
 
 		while (true) {
-			n = selector.select(50);
+			n = selector.select(1);
 			if (n == 0) {
 				if (pingback) {
 					this.pingBack();
 					pingback = false;
 				}
+				continue;
 			}
 			
 			selectedKeys = null;
@@ -111,6 +110,8 @@ public class ReceiverReconstructor implements Runnable {
 					sChannel.register(selector, SelectionKey.OP_READ);
 					
 					this.receiver.appendTCP("New TCP connection from " + sChannel.toString() + "\n");
+
+
 
 					FileOutputStream fout = new FileOutputStream(this.filePath);
 					this.fcout = fout.getChannel();
@@ -141,23 +142,44 @@ public class ReceiverReconstructor implements Runnable {
 
 
 					} else if (key.channel() == sChannel) {
-						this.receiver.appendTCP("Reading from sChannel\n");
-						System.out.printf("Reading from sChannel\n");
-						buffer.clear();
-						int r = this.sChannel.read(buffer);
-						if (r == -1) {
-							String tcpmessage = "TCP connection broke down!\n";
-							this.receiver.appendTCP(tcpmessage);
-							System.out.printf("%s", tcpmessage);
-							this.sChannel.close();
-							System.exit(1);
+						if (receiving) {
+							this.receiver.appendTCP("Reading from sChannel\n");
+							System.out.printf("Reading from sChannel\n");
+							buffer.clear();
+							int r = this.sChannel.read(buffer);
+							if (r == -1) {
+								String tcpmessage = "TCP connection broke down!\n";
+								this.receiver.appendTCP(tcpmessage);
+								System.out.printf("%s", tcpmessage);
+								this.sChannel.close();
+								System.exit(1);
+							} else {
+								buffer.flip();
+								r = buffer.getInt();
+								expectLow = r;
+								r = buffer.getInt();
+								expectHigh = r;
+								pingback = true;
+							}
 						} else {
-							buffer.flip();
-							r = buffer.getInt();
-							expectLow = r;
-							r = buffer.getInt();
-							expectHigh = r;
-							pingback = true;
+							buffer.clear();
+							int r = this.sChannel.read(buffer);
+							if (r == -1) {
+								String tcpmessage = "TCP connection broke down!\n";
+								this.receiver.appendTCP(tcpmessage);
+								System.out.printf("%s", tcpmessage);
+								this.sChannel.close();
+								System.exit(1);
+							} else {
+								buffer.flip();
+								this.expectedPackets = buffer.getInt();
+								String tcpmessage = "" + expectedPackets + " packets expected\n";
+								this.receiver.appendTCP(tcpmessage);
+								this.receiver.appendUDP(tcpmessage);
+								System.out.printf("%s", tcpmessage);
+							}
+							//xxxx
+							receiving = true;
 						}
 					} else {
 						System.err.printf("well, this is weird\n");
