@@ -112,6 +112,36 @@ public class ReceiverReconstructor implements Runnable {
 					this.receiver.appendTCP("New TCP connection from " + sChannel.toString() + "\n");
 
 
+					try {
+						Thread.sleep(400);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+
+					buffer.clear();
+					int r = this.sChannel.read(buffer);
+					System.out.printf("%d bytes read\n", r);
+					if (r == -1) {
+						String tcpmessage = "TCP connection broke down!\n";
+						this.receiver.appendTCP(tcpmessage);
+						System.out.printf("%s", tcpmessage);
+						this.sChannel.close();
+						System.exit(1);
+					} else {
+						buffer.flip();
+						this.expectedPackets = buffer.getInt();
+						String tcpmessage = "" + expectedPackets + " packets expected\n";
+						this.receiver.appendTCP(tcpmessage);
+						System.out.printf("%s", tcpmessage);
+						buffer.rewind();
+						sChannel.write(buffer);
+						buffer.clear();
+					}
+					//xxxx
+					receiving = true;
+
+
+					//yyyy
 
 					FileOutputStream fout = new FileOutputStream(this.filePath);
 					this.fcout = fout.getChannel();
@@ -163,25 +193,8 @@ public class ReceiverReconstructor implements Runnable {
 								pingback = true;
 							}
 						} else {
-							buffer.clear();
-							int r = this.sChannel.read(buffer);
-							if (r == -1) {
-								String tcpmessage = "TCP connection broke down!\n";
-								this.receiver.appendTCP(tcpmessage);
-								System.out.printf("%s", tcpmessage);
-								this.sChannel.close();
-								System.exit(1);
-							} else {
-								buffer.flip();
-								this.expectedPackets = buffer.getInt();
-								String tcpmessage = "" + expectedPackets + " packets expected\n";
-								this.receiver.appendTCP(tcpmessage);
-								this.receiver.appendUDP(tcpmessage);
-								System.out.printf("%s", tcpmessage);
-							}
-							//xxxx
-							receiving = true;
-						}
+							//xxxxxx
+													}
 					} else {
 						System.err.printf("well, this is weird\n");
 					}
@@ -207,14 +220,12 @@ public class ReceiverReconstructor implements Runnable {
 		i = expectLow;
 		for (i = expectLow; i < expectHigh + 1; i++) {
 			if ((p = this.pq.poll()) == null) {
-				System.out.printf("dropped %d\n", i);
 				countDrops++;
 				intBuffer.putInt(i);
 				continue;
 			}
 			while (i < p.getSeqNum()) {
 				countDrops++;
-				System.out.printf("dropped %d\n", i);
 				intBuffer.putInt(i);
 				i++;
 			}

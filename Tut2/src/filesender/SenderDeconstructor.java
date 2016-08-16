@@ -122,21 +122,23 @@ public class SenderDeconstructor implements Runnable {
 			this.socketChannel.connect(this.address);
 			while (!this.socketChannel.finishConnect());
 			this.sender.appendTCP("Set up TCP connection\n");
+			this.datagramChannel.register(selector, SelectionKey.OP_READ);
+			this.socketChannel.register(selector, SelectionKey.OP_READ);
 			buffer.clear();
 			buffer.putInt((this.fileSize / (Parameters.DATA_BYTES) + 1));
 			buffer.flip();
 			this.socketChannel.write(buffer);
+			selector.select();
+			buffer.clear();
+			socketChannel.read(buffer);
 		} catch (IOException e) {
 			sender.appendTCP("IOException: failed to create SocketChannel\n");
 			return false;
-		}
-
-		try {
-			this.datagramChannel.register(selector, SelectionKey.OP_READ);
-			this.socketChannel.register(selector, SelectionKey.OP_READ);
+			/*
 		} catch (ClosedChannelException e) {
 			System.out.printf("Closed Channel Exception\n");
 			e.printStackTrace();
+			*/
 		}
 		return true;
 	}
