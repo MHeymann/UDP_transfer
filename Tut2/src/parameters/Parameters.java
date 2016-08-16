@@ -12,6 +12,6 @@ public class Parameters {
 	public static final int DATA_BYTES = BUFFER_SIZE - (SEQ_BYTES + SIZE_BYTES);
 
 	public static final int PORTS = 256;
-	public static final int BURST_LENGTH = 256;
+	public static final int BURST_LENGTH = 1024;
 }
 

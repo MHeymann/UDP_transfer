@@ -5,6 +5,9 @@ import java.nio.*;
 import java.nio.channels.*;
 import java.net.*;
 import parameters.*;
+import java.util.HashMap;
+import java.util.Arrays;
+import packet.Packet;
 
 public class SenderDeconstructor implements Runnable {
 	private String fileLocation = null;
@@ -12,11 +15,11 @@ public class SenderDeconstructor implements Runnable {
 	private String IP_Address = null;
 	private Sender sender = null;
 	private int port = -1;
-
 	private SocketChannel socketChannel = null;
 	private DatagramChannel datagramChannel = null;
 	private InetSocketAddress address = null;
 	private Selector selector = null;
+	private HashMap<Integer, Packet> hMap = null;
 
 	public SenderDeconstructor(String fileLocation, int fileSize, String IP_Address, int port, Sender sender) 
 	{
@@ -28,6 +31,7 @@ public class SenderDeconstructor implements Runnable {
 		this.socketChannel = null;
 		this.datagramChannel = null;
 		this.selector = null;
+		this.hMap = null;;
 	}
 
 	public void run() {
@@ -39,8 +43,11 @@ public class SenderDeconstructor implements Runnable {
 		ByteBuffer readBuff = ByteBuffer.allocate(Parameters.DATA_BYTES);
 		FileInputStream fin;
 		FileChannel fcin;
-		int r = 0;
+		InetSocketAddress address = null;
+		int r1 = 0, r2 = 0;
 		int sequenceNo = 0;
+		int i;
+		int start, finish;
 		
 		try{
 			fin = new FileInputStream(this.fileLocation);	
@@ -49,64 +56,109 @@ public class SenderDeconstructor implements Runnable {
 		catch (FileNotFoundException e){
 			return;
 		}
+
+		/*
+		this.port++;
+		*/
+		for (sequenceNo = 0; true; ) {
+			for (i = 0, start = sequenceNo; i < Parameters.BURST_LENGTH; i++, sequenceNo++) {
+				sendBuff.clear();
+				readBuff.clear();
+	
+				try {
+					r1 = fcin.read(readBuff);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				if(r1 == -1) {
+					System.out.printf("Done reading\n");
+					break;
+				}
+				
+				readBuff.flip();
+				Packet packet = new Packet(sequenceNo, r1, Arrays.copyOf(readBuff.array(), readBuff.limit()));
+				hMap.put(sequenceNo, packet);
+				/*
+				sendBuff.putInt(sequenceNo);
+				sendBuff.putInt(r1);
+				readBuff.flip();
+				sendBuff.put(readBuff);
+				sendBuff.flip();
+				*/
+	
+				int destPort = this.port + (sequenceNo % Parameters.PORTS);
+				System.out.println("Sent to port " + destPort);
+				address = new InetSocketAddress(this.IP_Address, destPort);
+				packet.sendPacket(this.datagramChannel, address);
+				System.out.printf("sent packet %d\n", sequenceNo);
+	
+			}
+			finish = sequenceNo - 1;
+
+			sendBuff.clear();
+			sendBuff.putInt(start);
+			sendBuff.putInt(finish);
+			sendBuff.flip();
 		
 
-		this.port++;
-		for (sequenceNo = 0; true; sequenceNo++) {
-			sendBuff.clear();
-			readBuff.clear();
-
 			try {
-				r = fcin.read(readBuff);
+				this.sender.appendTCP("Ping\n");
+				this.socketChannel.write(sendBuff);
+				readBuff.clear();
+				selector.select();
+				r2 = socketChannel.read(readBuff);
+				if (r2 == -1) {
+					System.out.printf("receiver TCP disconnected\n");
+					this.sender.appendTCP("receiver TCP disconnected\n");
+					this.socketChannel.close();
+				} else {
+					System.out.printf("read %d bytes\n", r2);
+					readBuff.flip();
+					r2 = readBuff.getInt();
+					System.out.printf("read: %d sent: %d\n", r2, sequenceNo);
+					if (r2 == (finish - start + 1)){
+						System.out.println("Seems to be working");
+						this.sender.appendTCP("Seems to be working\n");
+					} else {
+						System.out.printf("Apparently not working\n");
+					}
+				}
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-			if(r == -1) {
+
+
+
+			if (r1 == -1) {
 				System.out.printf("Done reading\n");
 				break;
 			}
-			
-			sendBuff.putInt(sequenceNo);
-			sendBuff.putInt(r);
-			readBuff.flip();
-			sendBuff.put(readBuff);
-			sendBuff.flip();
-
-			try {
-				this.datagramChannel.send(sendBuff, new InetSocketAddress(this.IP_Address, this.port + (sequenceNo % Parameters.PORTS)));
-				System.out.printf("sent packet %d\n", sequenceNo);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-
 		}
-		sendBuff.clear();
-		sendBuff.putInt(1);
-		sendBuff.flip();
-		
+
 		try {
+			/*
 			this.sender.appendTCP("Ping\n");
 			this.socketChannel.write(sendBuff);
-			System.out.println(socketChannel);
 			selector.select();
 			readBuff.clear();
-			r = socketChannel.read(readBuff);
-			if (r == -1) {
+			r2 = socketChannel.read(readBuff);
+			if (r2 == -1) {
 				System.out.printf("receiver TCP disconnected\n");
 				this.sender.appendTCP("receiver TCP disconnected\n");
 				this.socketChannel.close();
 			} else {
-				System.out.printf("read %d bytes\n", r);
+				System.out.printf("read %d bytes\n", r2);
 				readBuff.flip();
-				r = readBuff.getInt();
-				System.out.printf("read: %d sent: %d\n", r, sequenceNo);
-				if(r == sequenceNo){
+				r2 = readBuff.getInt();
+				System.out.printf("read: %d sent: %d\n", r2, sequenceNo);
+				if (r2 == sequenceNo){
 					System.out.println("Seems to be working");
 					this.sender.appendTCP("Seems to be working");
 				} else {
 					System.out.printf("Apparently not working\n");
 				}
 			}
+			*/
 			fin.close();
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -117,6 +169,7 @@ public class SenderDeconstructor implements Runnable {
 
 	public boolean connect() {
 		try {
+			this.hMap = new HashMap<Integer, Packet>();
 			this.selector = Selector.open();
 			this.datagramChannel = DatagramChannel.open();
 			this.socketChannel = SocketChannel.open();

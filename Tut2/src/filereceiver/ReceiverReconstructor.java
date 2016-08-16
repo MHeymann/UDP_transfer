@@ -9,15 +9,17 @@ import java.io.IOException;
 import packet.*;
 import parameters.*;
 
-public class ReceiverListener implements Runnable {
+public class ReceiverReconstructor implements Runnable {
 	private Receiver receiver = null;
 	private int port = -1;
 	private SocketChannel sChannel = null;
 	private PriorityQueue<Packet> pq = null;
 	private ServerSocketChannel serverSocketChannel = null;
 	private Selector selector = null;
+	private int expectLow = -1;
+	private int expectHigh = -1;
 
-	public ReceiverListener(Receiver receiver, int port) {
+	public ReceiverReconstructor(Receiver receiver, int port) {
 		InetSocketAddress address = null;
 		ServerSocket serverSocket = null;
 		SelectionKey key = null;
@@ -37,7 +39,9 @@ public class ReceiverListener implements Runnable {
 			key = serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);
 			this.receiver.appendTCP("Listening on " + this.port + "\n");
 			/* NB: this must be after binding the serverSocketChannel address */
+			/*
 			this.port++;
+			*/
 	
 			/* set up the udp channels */
 			receiver.appendUDP("Setting up UDP channel for receiving file\n");
@@ -45,7 +49,8 @@ public class ReceiverListener implements Runnable {
 				dChannel = DatagramChannel.open();
 				dChannel.configureBlocking(false);
 				DatagramSocket dSocket = dChannel.socket();
-				dSocket.bind(new InetSocketAddress(port + i));
+				dSocket.bind(new InetSocketAddress(this.port + i));
+				System.out.println("registered port " + (i + this.port));
 				dChannel.register(selector, SelectionKey.OP_READ);
 			}
 			receiver.appendUDP("Set up UDP channels for receiving file\n");
@@ -74,14 +79,10 @@ public class ReceiverListener implements Runnable {
 		ByteBuffer buffer = ByteBuffer.allocate(Parameters.BUFFER_SIZE);
 		int n;
 		boolean pingback = false;
-		int expectLow = -1;
-		int expectHigh = -1;
 
 		while (true) {
-			n = selector.select(1000);
-			System.out.printf("Selected %d keys\n", n);
+			n = selector.select(100);
 			if (n == 0) {
-				System.out.printf("Nothing selected...\n");
 				if (pingback) {
 					this.pingBack();
 					pingback = false;
@@ -106,10 +107,6 @@ public class ReceiverListener implements Runnable {
 					sChannel.configureBlocking(false);
 					sChannel.register(selector, SelectionKey.OP_READ);
 					
-					/* TODO: this is the major change!! */
-					/*
-					(new Thread(new ReceiverConstructor(sChannel, this.receiver))).start();
-					*/
 					this.receiver.appendTCP("New TCP connection from " + sChannel.toString() + "\n");
 					it.remove();
 				} else if ((key.readyOps() & SelectionKey.OP_READ)
@@ -150,8 +147,9 @@ public class ReceiverListener implements Runnable {
 						} else {
 							buffer.flip();
 							r = buffer.getInt();
-							expectLow = 0;
-							expectHigh = r - 1;
+							expectLow = r;
+							r = buffer.getInt();
+							expectHigh = r;
 							pingback = true;
 						}
 					} else {
@@ -166,6 +164,7 @@ public class ReceiverListener implements Runnable {
 
 	public void pingBack() {
 		ByteBuffer buffer = ByteBuffer.allocate(Parameters.BUFFER_SIZE);
+		int i;
 		buffer.clear();
 		buffer.putInt(this.pq.size());
 		buffer.flip();
@@ -176,8 +175,14 @@ public class ReceiverListener implements Runnable {
 			e.printStackTrace();
 		}
 		Packet p;
+		i = expectLow;
 		while ((p = this.pq.poll()) != null){
+			while (i < p.getSeqNum()) {
+				System.out.printf("dropped %d\n", i);
+				i++;
+			}
 			System.out.printf("seqno: %d\n", p.getSeqNum());
+			i++;
 		}
 
 		System.out.printf("pq size is %d\n", this.pq.size());

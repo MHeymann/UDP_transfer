@@ -32,7 +32,7 @@ public class Receiver extends JFrame implements ActionListener {
 	/* current connection status */
 	private boolean connected = false;
 	/* The Receiver Listener */
-	private ReceiverListener listener = null;
+	private ReceiverReconstructor recon = null;
 	/* The Receiver Speaker for sending messages to the server */
 	private String myName = null;
 
@@ -103,9 +103,9 @@ public class Receiver extends JFrame implements ActionListener {
 		this.setSize(1200, 600);
 		this.setVisible(true);
 
-		this.listener = new ReceiverListener(this, port);
+		this.recon = new ReceiverReconstructor(this, port);
 
-		(new Thread(listener)).start();
+		(new Thread(recon)).start();
 	}
 
 	public int getPort() {
