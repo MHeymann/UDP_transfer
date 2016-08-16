@@ -57,9 +57,6 @@ public class SenderDeconstructor implements Runnable {
 			return;
 		}
 
-		/*
-		this.port++;
-		*/
 		for (sequenceNo = 0; true; ) {
 			for (i = 0, start = sequenceNo; i < Parameters.BURST_LENGTH; i++, sequenceNo++) {
 				sendBuff.clear();
@@ -82,17 +79,15 @@ public class SenderDeconstructor implements Runnable {
 				*/
 	
 				int destPort = this.port + (sequenceNo % Parameters.PORTS);
-				System.out.printf("Sent to port %d\n", destPort);
 				address = new InetSocketAddress(this.IP_Address, destPort);
 
+				packet.sendPacket(this.datagramChannel, address);
+				/*
 				if (i % 100 == 0) {
-					packet.sendPacket(this.datagramChannel, address);
 				} else {
 					packet.sendPacket(this.datagramChannel, address);
 				}
-
-				System.out.printf("sent packet %d\n", sequenceNo);
-	
+				*/
 			}
 
 
@@ -128,7 +123,7 @@ public class SenderDeconstructor implements Runnable {
 			while (!this.socketChannel.finishConnect());
 			this.sender.appendTCP("Set up TCP connection\n");
 			buffer.clear();
-			buffer.putInt(this.fileSize);
+			buffer.putInt((this.fileSize / (Parameters.DATA_BYTES) + 1));
 			buffer.flip();
 			this.socketChannel.write(buffer);
 		} catch (IOException e) {
@@ -167,7 +162,6 @@ public class SenderDeconstructor implements Runnable {
 			} else {
 				readBuff.flip();
 				int intCount = readBuff.getInt();
-				System.out.printf("read %d bytes\n", r2);
 				Packet p = null;
 				for (int j = 0; j < intCount; j++) {
 					r2 = readBuff.getInt();
@@ -176,15 +170,12 @@ public class SenderDeconstructor implements Runnable {
 					int destPort = this.port + (r2 % Parameters.PORTS);
 					address = new InetSocketAddress(this.IP_Address, destPort);
 					p.sendPacket(this.datagramChannel, address);
-					System.out.printf("Resent packet %d\n", r2);
 				}
 				
 				if (intCount == 0) {
-					System.out.printf("Seems to be working\n");
-					this.sender.appendTCP("Seems to be working\n");
 					return true;
 				} else {
-					System.out.printf("Apparently not working\n");
+					/* drop detected */
 					return false;
 				}
 			}

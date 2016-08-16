@@ -6,12 +6,12 @@ package parameters;
  */
 
 public class Parameters {
-	public static final int BUFFER_SIZE = 1024 * 10;
+	public static final int BUFFER_SIZE = 1024 * 5;
 	public static final int SEQ_BYTES = 4;
 	public static final int SIZE_BYTES = 4;
 	public static final int DATA_BYTES = BUFFER_SIZE - (SEQ_BYTES + SIZE_BYTES);
 
 	public static final int PORTS = 5;
-	public static final int BURST_LENGTH = 512;
+	public static final int BURST_LENGTH = 128;
 }
 

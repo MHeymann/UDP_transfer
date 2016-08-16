@@ -82,7 +82,7 @@ public class ReceiverReconstructor implements Runnable {
 		boolean receiving = false;
 
 		while (true) {
-			n = selector.select(1);
+			n = selector.select(4);
 			if (n == 0) {
 				if (pingback) {
 					this.pingBack();
@@ -127,7 +127,6 @@ public class ReceiverReconstructor implements Runnable {
 						buffer.flip();
 						int seqNo = buffer.getInt();
 						int size = buffer.getInt();
-						System.out.printf("seq no %d, size %d, remaining %d\n", seqNo, size, buffer.remaining());
 						byte[] data = new byte[size];
 						buffer.get(data, 0, size);
 						Packet packet = new Packet(seqNo, size, data);
@@ -143,8 +142,6 @@ public class ReceiverReconstructor implements Runnable {
 
 					} else if (key.channel() == sChannel) {
 						if (receiving) {
-							this.receiver.appendTCP("Reading from sChannel\n");
-							System.out.printf("Reading from sChannel\n");
 							buffer.clear();
 							int r = this.sChannel.read(buffer);
 							if (r == -1) {
@@ -200,6 +197,7 @@ public class ReceiverReconstructor implements Runnable {
 		intBuffer.clear();
 		countBuffer.clear();
 		PriorityQueue<Packet> tempq = new PriorityQueue<Packet>();
+		System.out.printf("PingBack!!\n");
 	
 		Packet p;
 		i = expectLow;
@@ -216,12 +214,12 @@ public class ReceiverReconstructor implements Runnable {
 				intBuffer.putInt(i);
 				i++;
 			}
-			System.out.printf("seqno: %d\n", p.getSeqNum());
 			tempq.add(p);
 		}
 
 		countBuffer.putInt(countDrops);
 		if (countDrops == 0) {
+			this.receiver.appendTCP("" + ((((10000 * (1 + expectHigh)) / this.expectedPackets) + 0.0) / 100) + "%\n");
 			writeToFile(tempq);
 			intBuffer.putInt(-1);
 		} else {

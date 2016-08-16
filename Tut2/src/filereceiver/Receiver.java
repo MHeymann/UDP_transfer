@@ -114,9 +114,6 @@ public class Receiver extends JFrame implements ActionListener {
 
 	public void appendTCP(String s) 
 	{
-		System.out.printf("hi!\n");
-		System.out.printf("%s\n", s);
-		System.out.printf("after null\n");
 		taTCP.append(s);
 		taTCP.setCaretPosition(taTCP.getText().length() - 1);
 	}
