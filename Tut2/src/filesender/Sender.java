@@ -150,7 +150,7 @@ public class Sender extends JFrame implements ActionListener {
 	public void appendUDP(String s) 
 	{
 		taUDP.append(s);
-		taUDP.setCaretPosition(taTCP.getText().length() - 1);
+		taUDP.setCaretPosition(taUDP.getText().length() - 1);
 	}
 
 	public void breakConnection() {
@@ -217,6 +217,12 @@ public class Sender extends JFrame implements ActionListener {
 			}
 			
 			(new Thread(this.deconstructor)).start();
+			try {
+				Thread.sleep(5000);
+				System.exit(0);
+			} catch (Exception ex) {
+				ex.printStackTrace();
+			}
 			
 			btnConnectSend.setEnabled(false);
 			btnDisconnect.setEnabled(true);

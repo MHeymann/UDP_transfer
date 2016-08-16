@@ -64,14 +64,22 @@ public class ReceiverConstructor implements Runnable {
 		SelectionKey key = null;
 		ByteBuffer buffer = ByteBuffer.allocate(Parameters.BUFFER_SIZE);
 		int n;
-		/*
-		InetSocketAddress address = null;
-		*/
+		boolean pingback = false;
+		int expectLow = -1;
+		int expectHigh = -1;
 
-		System.out.println("Let's go while(d)!");
 		while (true) {
 			System.out.println(this.sChannel);
-			n = this.selector.select();
+			n = this.selector.select(1000);
+
+			System.out.printf("Selected %d keys\n", n);
+			if (n == 0) {
+				System.out.printf("Nothing selected...\n");
+				if (pingback) {
+					this.pingBack();
+					pingback = false;
+				}
+			}
 
 			selectedKeys = null;	
 			selectedKeys = this.selector.selectedKeys();
@@ -99,26 +107,51 @@ public class ReceiverConstructor implements Runnable {
 					Packet packet = new Packet(seqNo, size, data);
 
 					this.pq.add(packet);
+					if (pingback) {
+						if (pq.size() == (expectHigh - expectLow + 1)) {
+							this.pingBack();
+							pingback = false;
+						}
+					}
 
 
 				} else if (key.channel() == sChannel) {
-					System.out.printf("posting to gui\n");
 					this.receiver.appendTCP("Reading from sChannel\n");
 					System.out.printf("Reading from sChannel\n");
 					buffer.clear();
 					int r = this.sChannel.read(buffer);
-					System.out.printf("Read %d bytes\n", r);
-					buffer.clear();
-					buffer.putInt(this.pq.size());
-					buffer.flip();
-					this.sChannel.write(buffer);
-					System.out.printf("pq size is %d\n", this.pq.size());
-					
+					if (r == -1) {
+						String tcpmessage = "TCP connection broke down!\n";
+						this.receiver.appendTCP(tcpmessage);
+						System.out.printf("%s", tcpmessage);
+						this.sChannel.close();
+					} else {
+						buffer.flip();
+						r = buffer.getInt();
+						expectLow = 0;
+						expectHigh = r - 1;
+						pingback = true;
+					}
 				} else {
 					System.err.printf("well, this is weird\n");
 				}
 				it.remove();	
 			}
+
 		}
+	}
+
+	public void pingBack() {
+		ByteBuffer buffer = ByteBuffer.allocate(Parameters.BUFFER_SIZE);
+		buffer.clear();
+		buffer.putInt(this.pq.size());
+		buffer.flip();
+		try {
+			this.sChannel.write(buffer);
+		} catch (IOException e) {
+			System.out.printf("IOException\n");
+			e.printStackTrace();
+		}
+		System.out.printf("pq size is %d\n", this.pq.size());
 	}
 }

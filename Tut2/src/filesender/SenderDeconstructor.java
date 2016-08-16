@@ -39,7 +39,8 @@ public class SenderDeconstructor implements Runnable {
 		ByteBuffer readBuff = ByteBuffer.allocate(Parameters.DATA_BYTES);
 		FileInputStream fin;
 		FileChannel fcin;
-		System.out.printf("Go()\n");
+		int r = 0;
+		int sequenceNo = 0;
 		
 		try{
 			fin = new FileInputStream(this.fileLocation);	
@@ -48,18 +49,12 @@ public class SenderDeconstructor implements Runnable {
 		catch (FileNotFoundException e){
 			return;
 		}
-		 
-
 		
-		int r = 0;
-		int sequenceNo = 0;
 
-		System.out.printf("For loop\n");
 		for (sequenceNo = 0; true; sequenceNo++) {
 			sendBuff.clear();
 			readBuff.clear();
 
-			System.out.printf("Reading\n");
 			try {
 				r = fcin.read(readBuff);
 			} catch (IOException e) {
@@ -80,53 +75,45 @@ public class SenderDeconstructor implements Runnable {
 
 			try {
 				this.datagramChannel.send(sendBuff, new InetSocketAddress(this.IP_Address, this.port + 1));
+				System.out.printf("sent packet %d\n", sequenceNo);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 
 		}
-		System.out.printf("For loop done\n");
-		
-		/*
-		sequenceNo--;
-		*/
 		sendBuff.clear();
 		sendBuff.putInt(1);
 		sendBuff.flip();
 		
-		
 		try {
-			Thread.sleep(1000);
-		} catch (Exception e) {
-		}
-		try {
-			System.out.printf("Ping!!\n");
+			this.sender.appendTCP("Ping\n");
 			this.socketChannel.write(sendBuff);
-			System.out.printf("Pinged!!\n");
 			System.out.println(socketChannel);
 			selector.select();
-			System.out.printf("selected!!\n");
 			readBuff.clear();
 			r = socketChannel.read(readBuff);
-			System.out.printf("read %d bytes\n", r);
-			readBuff.flip();
-			r = readBuff.getInt();
-			System.out.printf("read: %d sent: %d\n", r, sequenceNo);
-			if(r == sequenceNo){
-				System.out.println("Seems to be working");
-				
+			if (r == -1) {
+				System.out.printf("receiver TCP disconnected\n");
+				this.sender.appendTCP("receiver TCP disconnected\n");
+				this.socketChannel.close();
 			} else {
-				System.out.printf("Apparently not working\n");
+				System.out.printf("read %d bytes\n", r);
+				readBuff.flip();
+				r = readBuff.getInt();
+				System.out.printf("read: %d sent: %d\n", r, sequenceNo);
+				if(r == sequenceNo){
+					System.out.println("Seems to be working");
+					this.sender.appendTCP("Seems to be working");
+				} else {
+					System.out.printf("Apparently not working\n");
+				}
 			}
 			fin.close();
 		} catch (IOException e) {
 			e.printStackTrace();
-			
 		}
-
 		System.out.printf("Done sending file\n");
-		
-		
+		this.sender.appendTCP("Set up TCP connection\n");
 	}
 
 	public boolean connect() {
@@ -139,25 +126,11 @@ public class SenderDeconstructor implements Runnable {
 			this.address = new InetSocketAddress(this.IP_Address, this.port);
 			this.socketChannel.connect(this.address);
 			while (!this.socketChannel.finishConnect());
+			this.sender.appendTCP("Set up TCP connection\n");
 		} catch (IOException e) {
 			sender.appendTCP("IOException: failed to create SocketChannel\n");
 			return false;
 		}
-		sender.appendTCP("Set up TCP connection\n");
-
-		/*
-		DatagramSocket dSocket = datagramChannel.socket();
-		this.address = new InetSocketAddress(this.IP_Address, this.port + 1);
-		*/
-		/* TODO: since we arent receiving back, is it necessary to bind? */
-		/*
-		try {
-			dSocket.bind(this.address);
-		} catch (SocketException e) {
-			System.out.printf("Socket Exception\n");
-			e.printStackTrace();
-		}
-		*/
 
 		try {
 			this.datagramChannel.register(selector, SelectionKey.OP_READ);
@@ -166,7 +139,6 @@ public class SenderDeconstructor implements Runnable {
 			System.out.printf("Closed Channel Exception\n");
 			e.printStackTrace();
 		}
-
 		return true;
 	}
 }
