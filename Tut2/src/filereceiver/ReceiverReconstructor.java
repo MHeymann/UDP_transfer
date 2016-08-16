@@ -156,6 +156,9 @@ public class ReceiverReconstructor implements Runnable {
 								expectLow = r;
 								r = buffer.getInt();
 								expectHigh = r;
+								if (r == -1) {
+									System.exit(0);
+								}
 								pingback = true;
 							}
 						} else {

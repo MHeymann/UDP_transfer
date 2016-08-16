@@ -141,6 +141,21 @@ public class SenderDeconstructor implements Runnable {
 		return true;
 	}
 
+	public void sigTerminate(ByteBuffer sendBuff) {
+		int r2;
+		sendBuff.clear();
+		sendBuff.putInt(-1);
+		sendBuff.putInt(-1);
+		sendBuff.flip();
+	
+		try {
+			this.sender.appendTCP("Ping\n");
+			this.socketChannel.write(sendBuff);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+	}
 	public boolean ping(int start, int finish, ByteBuffer sendBuff, ByteBuffer readBuff) {
 		int r2;
 		sendBuff.clear();
@@ -148,7 +163,6 @@ public class SenderDeconstructor implements Runnable {
 		sendBuff.putInt(finish);
 		sendBuff.flip();
 	
-
 		try {
 			this.sender.appendTCP("Ping\n");
 			this.socketChannel.write(sendBuff);
