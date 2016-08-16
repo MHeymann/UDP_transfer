@@ -30,5 +30,4 @@ RemoteSystemsTempFiles
 */.settings
 */.project
 */RemoteSystemsTempFiles
-
-
+*/.classpath
