@@ -22,10 +22,13 @@ tale.txt
 
 .metadata
 .recommenders
+RemoteSystemsTempFiles
 .metadata/*
 .recommenders/*
 */.metadata
 */.recommenders
 */.settings
 */.project
+*/RemoteSystemsTempFiles
+
 
