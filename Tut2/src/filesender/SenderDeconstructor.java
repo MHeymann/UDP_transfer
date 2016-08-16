@@ -79,55 +79,27 @@ public class SenderDeconstructor implements Runnable {
 				Packet packet = new Packet(sequenceNo, r1, Arrays.copyOf(readBuff.array(), readBuff.limit()));
 				hMap.put(sequenceNo, packet);
 				/*
-				sendBuff.putInt(sequenceNo);
-				sendBuff.putInt(r1);
-				readBuff.flip();
-				sendBuff.put(readBuff);
-				sendBuff.flip();
 				*/
 	
 				int destPort = this.port + (sequenceNo % Parameters.PORTS);
 				System.out.printf("Sent to port %d\n", destPort);
 				address = new InetSocketAddress(this.IP_Address, destPort);
-				packet.sendPacket(this.datagramChannel, address);
+
+				if (i % 100 == 0) {
+
+				} else {
+					packet.sendPacket(this.datagramChannel, address);
+				}
+
 				System.out.printf("sent packet %d\n", sequenceNo);
 	
 			}
+
+
 			finish = sequenceNo - 1;
 
-			sendBuff.clear();
-			sendBuff.putInt(start);
-			sendBuff.putInt(finish);
-			sendBuff.flip();
-		
-
-			try {
-				this.sender.appendTCP("Ping\n");
-				this.socketChannel.write(sendBuff);
-				readBuff.clear();
-				selector.select();
-				r2 = socketChannel.read(readBuff);
-				if (r2 == -1) {
-					System.out.printf("receiver TCP disconnected\n");
-					this.sender.appendTCP("receiver TCP disconnected\n");
-					this.socketChannel.close();
-				} else {
-					System.out.printf("read %d bytes\n", r2);
-					readBuff.flip();
-					r2 = readBuff.getInt();
-					System.out.printf("read: %d sent: %d\n", r2, sequenceNo);
-					if (r2 == (finish - start + 1)){
-						System.out.printf("Seems to be working\n");
-						this.sender.appendTCP("Seems to be working\n");
-					} else {
-						System.out.printf("Apparently not working\n");
-					}
-				}
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-
-
+		///xxx	
+			while (!ping(start, finish, sendBuff, readBuff));
 
 			if (r1 == -1) {
 				System.out.printf("Done reading\n");
@@ -136,35 +108,11 @@ public class SenderDeconstructor implements Runnable {
 		}
 
 		try {
-			/*
-			this.sender.appendTCP("Ping\n");
-			this.socketChannel.write(sendBuff);
-			selector.select();
-			readBuff.clear();
-			r2 = socketChannel.read(readBuff);
-			if (r2 == -1) {
-				System.out.printf("receiver TCP disconnected\n");
-				this.sender.appendTCP("receiver TCP disconnected\n");
-				this.socketChannel.close();
-			} else {
-				System.out.printf("read %d bytes\n", r2);
-				readBuff.flip();
-				r2 = readBuff.getInt();
-				System.out.printf("read: %d sent: %d\n", r2, sequenceNo);
-				if (r2 == sequenceNo){
-					System.out.println("Seems to be working");
-					this.sender.appendTCP("Seems to be working");
-				} else {
-					System.out.printf("Apparently not working\n");
-				}
-			}
-			*/
 			fin.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		System.out.printf("Done sending file\n");
-		this.sender.appendTCP("Set up TCP connection\n");
 	}
 
 	public boolean connect() {
@@ -193,4 +141,53 @@ public class SenderDeconstructor implements Runnable {
 		}
 		return true;
 	}
+
+	public boolean ping(int start, int finish, ByteBuffer sendBuff, ByteBuffer readBuff) {
+		int r2;
+		sendBuff.clear();
+		sendBuff.putInt(start);
+		sendBuff.putInt(finish);
+		sendBuff.flip();
+	
+
+		try {
+			this.sender.appendTCP("Ping\n");
+			this.socketChannel.write(sendBuff);
+			readBuff.clear();
+			selector.select();
+			r2 = socketChannel.read(readBuff);
+			if (r2 == -1) {
+				System.out.printf("receiver TCP disconnected\n");
+				this.sender.appendTCP("receiver TCP disconnected\n");
+				this.socketChannel.close();
+			} else {
+				readBuff.flip();
+				int intCount = readBuff.getInt();
+				System.out.printf("read %d bytes\n", r2);
+				Packet p = null;
+				for (int j = 0; j < intCount; j++) {
+					r2 = readBuff.getInt();
+					p = hMap.get(r2);
+
+					int destPort = this.port + (r2 % Parameters.PORTS);
+					address = new InetSocketAddress(this.IP_Address, destPort);
+					p.sendPacket(this.datagramChannel, address);
+					System.out.printf("Resent packet %d\n", r2);
+				}
+				
+				if (intCount == 0) {
+					System.out.printf("Seems to be working\n");
+					this.sender.appendTCP("Seems to be working\n");
+					return true;
+				} else {
+					System.out.printf("Apparently not working\n");
+					return false;
+				}
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return true;
+	}
+
 }

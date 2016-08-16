@@ -3,7 +3,6 @@ package filereceiver;
 import java.net.*;
 import java.nio.channels.*;
 import java.nio.*;
-import java.io.FileOutputStream;
 import java.util.*;
 import java.io.IOException;
 
@@ -19,8 +18,6 @@ public class ReceiverReconstructor implements Runnable {
 	private Selector selector = null;
 	private int expectLow = -1;
 	private int expectHigh = -1;
-	private FileChannel fcout = null;
-	private String filePath = "hardcodefile";
 
 	public ReceiverReconstructor(Receiver receiver, int port) {
 		InetSocketAddress address = null;
@@ -111,9 +108,6 @@ public class ReceiverReconstructor implements Runnable {
 					sChannel.register(selector, SelectionKey.OP_READ);
 					
 					this.receiver.appendTCP("New TCP connection from " + sChannel.toString() + "\n");
-
-					FileOutputStream fout = new FileOutputStream(this.filePath);
-					this.fcout = fout.getChannel();
 					it.remove();
 				} else if ((key.readyOps() & SelectionKey.OP_READ)
 						== SelectionKey.OP_READ) {
@@ -150,7 +144,6 @@ public class ReceiverReconstructor implements Runnable {
 							this.receiver.appendTCP(tcpmessage);
 							System.out.printf("%s", tcpmessage);
 							this.sChannel.close();
-							System.exit(1);
 						} else {
 							buffer.flip();
 							r = buffer.getInt();
@@ -170,70 +163,44 @@ public class ReceiverReconstructor implements Runnable {
 	}
 
 	public void pingBack() {
-		ByteBuffer intBuffer = ByteBuffer.allocate(Parameters.BUFFER_SIZE);
-		ByteBuffer countBuffer = ByteBuffer.allocate(4);
-		ByteBuffer buffers[] = new ByteBuffer[2];
+		ByteBuffer buffer = ByteBuffer.allocate(Parameters.BUFFER_SIZE);
 		int i;
 		int countDrops = 0;
-		intBuffer.clear();
-		countBuffer.clear();
+		buffer.clear();
 		PriorityQueue<Packet> tempq = new PriorityQueue<Packet>();
+		/*
+		buffer.putInt(this.pq.size());
+		*/
 	
 		Packet p;
 		i = expectLow;
-		for (i = expectLow; i < expectHigh + 1; i++) {
-			if ((p = this.pq.poll()) == null) {
-				System.out.printf("dropped %d\n", i);
-				countDrops++;
-				intBuffer.putInt(i);
-				continue;
-			}
+		while ((p = this.pq.poll()) != null){
 			while (i < p.getSeqNum()) {
 				countDrops++;
 				System.out.printf("dropped %d\n", i);
-				intBuffer.putInt(i);
+				buffer.putInt(i);
 				i++;
 			}
 			System.out.printf("seqno: %d\n", p.getSeqNum());
+			i++;
 			tempq.add(p);
 		}
 
-		countBuffer.putInt(countDrops);
 		if (countDrops == 0) {
-			writeToFile(tempq);
-			intBuffer.putInt(-1);
 		} else {
-			this.pq = tempq;
+		this.pq = tempq;
 		}
 
 
-		countBuffer.flip();
-		intBuffer.flip();
-		buffers[0] = countBuffer;
-		buffers[1] = intBuffer;
+		buffer.flip();
 		try {
-			this.sChannel.write(buffers);
+			this.sChannel.write(buffer);
 		} catch (IOException e) {
 			System.out.printf("IOException\n");
 			e.printStackTrace();
 		}
 
 		System.out.printf("pq size is %d\n", this.pq.size());
-	}
-
-	public void writeToFile(PriorityQueue<Packet> q) {
-		Packet p = null;
-		ByteBuffer buffer = ByteBuffer.allocate(Parameters.DATA_BYTES);
-		while ((p = q.poll()) != null) {
-			buffer.clear();
-			buffer.put(p.getData());
-			buffer.flip();
-			try {
-				fcout.write(buffer);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
 	}
 
 }
