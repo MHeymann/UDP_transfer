@@ -116,7 +116,6 @@ public class Receiver extends JFrame implements ActionListener {
 	{
 		System.out.printf("hi!\n");
 		System.out.printf("%s\n", s);
-		System.out.println(taTCP);
 		System.out.printf("after null\n");
 		taTCP.append(s);
 		taTCP.setCaretPosition(taTCP.getText().length() - 1);
@@ -154,6 +153,6 @@ public class Receiver extends JFrame implements ActionListener {
     public static void main(String[] args)  {
 		Receiver receiver = null;
 		receiver = new Receiver("localhost", 8002);
-		System.out.println("made a receiver");
+		System.out.printf("made a receiver\n");
 	}
 }

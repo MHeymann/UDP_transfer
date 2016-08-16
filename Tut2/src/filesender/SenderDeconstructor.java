@@ -87,7 +87,7 @@ public class SenderDeconstructor implements Runnable {
 				*/
 	
 				int destPort = this.port + (sequenceNo % Parameters.PORTS);
-				System.out.println("Sent to port " + destPort);
+				System.out.printf("Sent to port %d\n", destPort);
 				address = new InetSocketAddress(this.IP_Address, destPort);
 				packet.sendPacket(this.datagramChannel, address);
 				System.out.printf("sent packet %d\n", sequenceNo);
@@ -117,7 +117,7 @@ public class SenderDeconstructor implements Runnable {
 					r2 = readBuff.getInt();
 					System.out.printf("read: %d sent: %d\n", r2, sequenceNo);
 					if (r2 == (finish - start + 1)){
-						System.out.println("Seems to be working");
+						System.out.printf("Seems to be working\n");
 						this.sender.appendTCP("Seems to be working\n");
 					} else {
 						System.out.printf("Apparently not working\n");

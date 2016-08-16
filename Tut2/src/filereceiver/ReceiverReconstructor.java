@@ -50,7 +50,7 @@ public class ReceiverReconstructor implements Runnable {
 				dChannel.configureBlocking(false);
 				DatagramSocket dSocket = dChannel.socket();
 				dSocket.bind(new InetSocketAddress(this.port + i));
-				System.out.println("registered port " + (i + this.port));
+				System.out.printf("registered port %d\n", (i + this.port));
 				dChannel.register(selector, SelectionKey.OP_READ);
 			}
 			receiver.appendUDP("Set up UDP channels for receiving file\n");
