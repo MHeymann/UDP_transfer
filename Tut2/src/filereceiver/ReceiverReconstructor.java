@@ -84,7 +84,7 @@ public class ReceiverReconstructor implements Runnable {
 		boolean pingback = false;
 
 		while (true) {
-			n = selector.select(400);
+			n = selector.select(50);
 			if (n == 0) {
 				if (pingback) {
 					this.pingBack();
