@@ -80,7 +80,6 @@ public class ReceiverConstructor implements Runnable {
 
 			while(it.hasNext()) {
 				key = it.next();
-				System.out.printf("got key\n");
 				if ((key.readyOps() & SelectionKey.OP_READ) 
 						!= SelectionKey.OP_READ) {
 					System.out.printf("this shouldn't happen\n");

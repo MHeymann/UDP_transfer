@@ -24,6 +24,8 @@ tale.txt
 .recommenders
 .metadata/*
 .recommenders/*
-*/.metadata/*
-*/.recommenders/*
+*/.metadata
+*/.recommenders
+*/.settings
+*/.project
 
