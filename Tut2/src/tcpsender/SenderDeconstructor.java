@@ -89,7 +89,7 @@ public class SenderDeconstructor implements Runnable {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		System.exit(2);
+		System.out.printf("done\n");
 	}
 
 	public boolean connect() {
