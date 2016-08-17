@@ -151,7 +151,6 @@ public class ReceiverReconstructor implements Runnable {
 
 					if (key.channel() instanceof DatagramChannel) {
 						dChannel = (DatagramChannel)key.channel();
-						//this.receiver.appendUDP("Reading from dChannel\n");
 						buffer.clear();
 						dChannel.receive(buffer);
 						buffer.flip();

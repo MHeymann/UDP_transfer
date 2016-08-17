@@ -95,6 +95,8 @@ public class SenderDeconstructor implements Runnable {
 
 			while (!ping(start, finish, sendBuff, readBuff));
 
+			hMap.clear();
+
 			if (r1 == -1) {
 				System.out.printf("Done reading\n");
 				break;
