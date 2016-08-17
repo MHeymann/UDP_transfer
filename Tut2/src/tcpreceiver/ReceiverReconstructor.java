@@ -92,6 +92,24 @@ public class ReceiverReconstructor implements Runnable {
 					
 					this.receiver.appendTCP("New TCP connection from " + sChannel.toString() + "\n");
 
+				
+					try {
+						this.filePath = (String)JOptionPane.showInputDialog(
+							receiver,
+							"Please give the file name you prefer",
+							"File Name",
+							JOptionPane.PLAIN_MESSAGE
+                    	);
+                    } catch (Exception e) {
+                    	e.printStackTrace();
+                    }
+
+					//If a string was returned, say so.
+					if ((this.filePath != null) && (this.filePath.length() > 0)) {
+					} else {
+						this.filePath = "myFile";
+					}
+
 					try {
 						Thread.sleep(400);
 					} catch (Exception e) {
@@ -118,22 +136,6 @@ public class ReceiverReconstructor implements Runnable {
 					}
 
 
-					try {
-						this.filePath = (String)JOptionPane.showInputDialog(
-							receiver,
-							"Please give the file name you prefer",
-							"File Name",
-							JOptionPane.PLAIN_MESSAGE
-                    	);
-                    } catch (Exception e) {
-                    	e.printStackTrace();
-                    }
-
-					//If a string was returned, say so.
-					if ((this.filePath != null) && (this.filePath.length() > 0)) {
-					} else {
-						this.filePath = "myFile";
-					}
 
 					this.startTime = System.currentTimeMillis();
 
@@ -143,6 +145,7 @@ public class ReceiverReconstructor implements Runnable {
 				} else if ((key.readyOps() & SelectionKey.OP_READ)
 						== SelectionKey.OP_READ) {
 
+					System.out.printf("mewp %d\n", currentRead);
 					sChannel = (SocketChannel)key.channel();
 					buffer.clear();
 					int r = sChannel.read(buffer);

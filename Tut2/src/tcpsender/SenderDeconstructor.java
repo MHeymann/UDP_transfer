@@ -53,8 +53,10 @@ public class SenderDeconstructor implements Runnable {
 			return;
 		}
 
+		i = 0;
 		while(true) {
 			buffer.clear();
+			System.out.printf("send %d\n", i);
 
 			try {
 				r = fcin.read(buffer);
@@ -73,16 +75,21 @@ public class SenderDeconstructor implements Runnable {
 				e.printStackTrace();
 			}
 
-
+			i++;
 		}
 		
 		try {
 			fin.close();
-			this.socketChannel.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		System.out.printf("Done sending file\n");
+		try {
+			this.selector.select();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		System.exit(2);
 	}
 
 	public boolean connect() {
