@@ -6,6 +6,7 @@ import java.nio.*;
 import java.io.FileOutputStream;
 import java.util.*;
 import java.io.IOException;
+import javax.swing.JOptionPane;
 
 import packet.*;
 import parameters.*;
@@ -142,6 +143,22 @@ public class ReceiverReconstructor implements Runnable {
 
 
 					//yyyy
+					try {
+						this.filePath = (String)JOptionPane.showInputDialog(
+							receiver,
+							"Please give the file name you prefer",
+							"File Name",
+							JOptionPane.PLAIN_MESSAGE
+                    	);
+                    } catch (Exception e) {
+                    	e.printStackTrace();
+                    }
+
+					//If a string was returned, say so.
+					if ((this.filePath != null) && (this.filePath.length() > 0)) {
+					} else {
+						this.filePath = "myFile";
+					}
 
 					FileOutputStream fout = new FileOutputStream(this.filePath);
 					this.fcout = fout.getChannel();
