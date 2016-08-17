@@ -7,6 +7,9 @@ import java.io.FileOutputStream;
 import java.util.*;
 import java.io.IOException;
 import javax.swing.JOptionPane;
+/*
+import java.lang.System;
+*/
 
 import packet.*;
 import parameters.*;
@@ -23,6 +26,8 @@ public class ReceiverReconstructor implements Runnable {
 	private FileChannel fcout = null;
 	private String filePath = "hardcodefile";
 	private int expectedPackets = -1;
+	private long startTime = -1;
+	private long endTime = -1;
 
 	public ReceiverReconstructor(Receiver receiver, int port) {
 		InetSocketAddress address = null;
@@ -160,6 +165,8 @@ public class ReceiverReconstructor implements Runnable {
 						this.filePath = "myFile";
 					}
 
+					this.startTime = System.currentTimeMillis();
+
 					FileOutputStream fout = new FileOutputStream(this.filePath);
 					this.fcout = fout.getChannel();
 					it.remove();
@@ -249,7 +256,13 @@ public class ReceiverReconstructor implements Runnable {
 
 		countBuffer.putInt(countDrops);
 		if (countDrops == 0) {
-			this.receiver.appendTCP("" + ((((10000L * (1 + expectHigh)) / this.expectedPackets) + 0.0) / 100) + "%\n");
+			double percentage = ((((10000L * (1 + expectHigh)) / this.expectedPackets) + 0.0) / 100);
+			this.receiver.appendTCP("" + percentage + "%\n");
+			if (percentage >= 99.99) {
+				this.endTime = System.currentTimeMillis();
+				double time = ((this.endTime - this.startTime) / 100 + 0.1) / 10;
+				receiver.appendTCP("Time taken in seconds: " + time + "\n");
+			}
 			writeToFile(tempq);
 			intBuffer.putInt(-1);
 		} else {
