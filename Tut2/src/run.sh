@@ -7,5 +7,5 @@ elif [ "$1" = "receive" ]
 then
 java filereceiver.Receiver
 else 
-java ShareFile 
+java -Xms512m -Xmx512m ShareFile 
 fi
