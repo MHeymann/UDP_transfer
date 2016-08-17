@@ -151,7 +151,7 @@ public class SenderDeconstructor implements Runnable {
 		sendBuff.flip();
 	
 		try {
-			this.sender.appendTCP("Ping\n");
+			//this.sender.appendTCP("Ping\n");
 			this.socketChannel.write(sendBuff);
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -166,7 +166,7 @@ public class SenderDeconstructor implements Runnable {
 		sendBuff.flip();
 	
 		try {
-			this.sender.appendTCP("Ping\n");
+			//this.sender.appendTCP("Ping\n");
 			this.socketChannel.write(sendBuff);
 			readBuff.clear();
 			selector.select();

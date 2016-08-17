@@ -151,7 +151,7 @@ public class ReceiverReconstructor implements Runnable {
 
 					if (key.channel() instanceof DatagramChannel) {
 						dChannel = (DatagramChannel)key.channel();
-						this.receiver.appendUDP("Reading from dChannel\n");
+						//this.receiver.appendUDP("Reading from dChannel\n");
 						buffer.clear();
 						dChannel.receive(buffer);
 						buffer.flip();
@@ -189,7 +189,7 @@ public class ReceiverReconstructor implements Runnable {
 								if (r == -1) {
 									System.exit(0);
 								} 
-								System.out.printf("Ping registered\n");
+								//System.out.printf("Ping registered\n");
 								pingback = true;
 							}
 						} else {
@@ -214,7 +214,7 @@ public class ReceiverReconstructor implements Runnable {
 		intBuffer.clear();
 		countBuffer.clear();
 		PriorityQueue<Packet> tempq = new PriorityQueue<Packet>();
-		System.out.printf("PingBack!!\n");
+		//System.out.printf("PingBack!!\n");
 	
 		Packet p;
 		i = expectLow;
@@ -253,7 +253,7 @@ public class ReceiverReconstructor implements Runnable {
 			e.printStackTrace();
 		}
 
-		System.out.printf("pq size is %d\n", this.pq.size());
+		//System.out.printf("pq size is %d\n", this.pq.size());
 	}
 
 	public void writeToFile(PriorityQueue<Packet> q) {
