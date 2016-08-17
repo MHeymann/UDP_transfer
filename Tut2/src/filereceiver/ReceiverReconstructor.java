@@ -213,7 +213,6 @@ public class ReceiverReconstructor implements Runnable {
 		intBuffer.clear();
 		countBuffer.clear();
 		PriorityQueue<Packet> tempq = new PriorityQueue<Packet>();
-		//System.out.printf("PingBack!!\n");
 	
 		Packet p;
 		i = expectLow;
@@ -233,7 +232,7 @@ public class ReceiverReconstructor implements Runnable {
 
 		countBuffer.putInt(countDrops);
 		if (countDrops == 0) {
-			this.receiver.appendTCP("" + ((((10000 * (1 + expectHigh)) / this.expectedPackets) + 0.0) / 100) + "%\n");
+			this.receiver.appendTCP("" + ((((10000L * (1 + expectHigh)) / this.expectedPackets) + 0.0) / 100) + "%\n");
 			writeToFile(tempq);
 			intBuffer.putInt(-1);
 		} else {
